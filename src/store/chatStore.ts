@@ -119,6 +119,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 }));
 
+// A stable, shared reference for "no messages yet". Returning a fresh `[]`
+// literal from the selector below would give React a new array identity on
+// every call even when nothing changed, which — under zustand's
+// useSyncExternalStore-based subscriptions — triggers an infinite
+// render loop ("Maximum update depth exceeded", React error #185) instead
+// of ever painting the empty state.
+const EMPTY_MESSAGES: ChatMessage[] = [];
+
 export function selectMessages(lessonId: string | undefined) {
-  return (s: ChatState): ChatMessage[] => (lessonId ? (s.conversationsByLesson[lessonId] ?? []) : []);
+  return (s: ChatState): ChatMessage[] =>
+    lessonId ? (s.conversationsByLesson[lessonId] ?? EMPTY_MESSAGES) : EMPTY_MESSAGES;
 }
