@@ -42,14 +42,14 @@ export function ChatInput({ onSend, disabled }: Props) {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex md:flex-wrap gap-2 scroll-x-touch -mx-4 px-4 md:mx-0 md:px-0">
         {QUICK_ACTIONS.map((action) => (
           <button
             key={action.label}
             type="button"
             disabled={disabled}
             onClick={() => submit(action.buildPrompt(draft))}
-            className="px-3 py-1.5 rounded-full text-xs font-semibold border border-ink-3 text-paper/60 hover:border-signal/50 hover:text-paper transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
+            className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border border-ink-3 text-paper/60 hover:border-signal/50 hover:text-paper transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
           >
             {action.label}
           </button>

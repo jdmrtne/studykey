@@ -46,7 +46,9 @@ export function ChatPanel({ lesson, config }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8.5rem)] sm:h-[calc(100vh-7rem)] max-h-[46rem] rounded-[1.25rem] border border-ink-3 bg-ink-2/80 backdrop-blur-sm shadow-xl shadow-black/20 overflow-hidden">
+    <div
+      className="flex flex-col h-[calc(100dvh-var(--mobile-header-h)-var(--mobile-nav-h)-2.6rem-1.25rem-env(safe-area-inset-bottom,0px))] md:h-[calc(100vh-7rem)] md:max-h-[46rem] rounded-[1.25rem] border border-ink-3 bg-ink-2/80 backdrop-blur-sm shadow-xl shadow-black/20 overflow-hidden"
+    >
       {/* Lesson header — always visible so the student is never unsure which lesson is being discussed. */}
       <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-ink-3 bg-ink-2">
         <div className="flex items-center gap-2 min-w-0">

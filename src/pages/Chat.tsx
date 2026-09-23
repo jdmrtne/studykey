@@ -13,10 +13,14 @@ export function Chat() {
   const config = useAISettingsStore((s) => s.config);
   const lessons = useLessonsStore((s) => s.lessons);
   const lesson = useLessonsStore(selectSelectedLesson);
+  const showingPanel = isConfigured && lessons.length > 0 && !!lesson;
 
   return (
-    <div className="flex flex-col gap-6 h-full">
-      <div>
+    <div className="flex flex-col gap-4 md:gap-6 h-full">
+      {/* On mobile, once the chat panel itself is showing, its own header already
+          says which lesson you're in and the bottom nav says "Chat" — a second
+          page title would just eat space above the fold. */}
+      <div className={showingPanel ? "hidden md:block" : undefined}>
         <h1 className="text-2xl font-display font-bold">Chat</h1>
         <p className="text-paper/60 text-sm mt-1">Ask questions about your lesson — answers stay grounded in it.</p>
       </div>

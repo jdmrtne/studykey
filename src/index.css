@@ -43,6 +43,11 @@
 
   --glow-1: rgba(139, 109, 240, 0.2);
   --glow-2: rgba(91, 140, 255, 0.16);
+
+  /* Mobile chrome sizing — shared by AppShell's mobile header/bottom nav
+     and any page that needs to reserve space for them. */
+  --mobile-header-h: 3.25rem;
+  --mobile-nav-h: 4rem;
 }
 
 [data-theme="light"] {
@@ -91,6 +96,16 @@
   code, pre {
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
   }
+  /* Inputs must be >=16px or iOS Safari zooms the viewport on focus, which
+     breaks the mobile layout (and is jarring mid-chat). */
+  input, textarea, select {
+    font-size: 16px;
+  }
+  @media (min-width: 640px) {
+    input, textarea, select {
+      font-size: inherit;
+    }
+  }
 }
 
 @layer utilities {
@@ -99,6 +114,21 @@
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+  /* Scrollable rows (quick actions, chip lists) on mobile without a visible
+     scrollbar eating into the touch area. */
+  .scroll-x-touch {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .scroll-x-touch::-webkit-scrollbar {
+    display: none;
+  }
+  /* Minimum comfortable touch target (Apple/Material guidance is 44px). */
+  .tap-target {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
   }
 }
 

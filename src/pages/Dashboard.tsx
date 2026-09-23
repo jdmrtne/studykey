@@ -42,7 +42,7 @@ export function Dashboard() {
   const selectLesson = useLessonsStore((s) => s.selectLesson);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 md:gap-6">
       <div>
         <h1 className="text-2xl font-display font-bold">Dashboard</h1>
         <p className="text-paper/60 text-sm mt-1">
@@ -53,7 +53,7 @@ export function Dashboard() {
       {!isConfigured && <NotConfiguredBanner />}
 
       {lessons.length === 0 ? (
-        <Card className="p-8 sm:p-10 flex flex-col items-center text-center gap-5">
+        <Card className="p-6 sm:p-10 flex flex-col items-center text-center gap-5">
           <span className="w-14 h-14 rounded-2xl bg-signal/10 text-signal flex items-center justify-center">
             <BookOpen className="w-7 h-7" />
           </span>

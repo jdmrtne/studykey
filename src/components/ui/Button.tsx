@@ -37,7 +37,7 @@ export function Button({
   return (
     <button
       className={clsx(
-        "font-display font-semibold transition-all duration-150 select-none touch-manipulation",
+        "font-display font-semibold transition-all duration-150 select-none touch-manipulation tap-target inline-flex items-center justify-center",
         "focus-visible:outline-3 focus-visible:outline-signal",
         "disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:active:translate-y-0 disabled:active:scale-100",
         variantClasses[variant],
