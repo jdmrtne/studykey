@@ -9,9 +9,12 @@ export interface StoredAIConfig extends ProviderConfig {
 }
 
 /**
- * Section 3 of the architecture spec: if "remember API key" is unchecked,
- * the key must not be persisted at all — only provider/model/baseUrl are
- * saved, and apiKey lives in memory (React state) for the session only.
+ * The API key is persisted to localStorage by default (like the rest of
+ * the config) so it survives a refresh without any extra action — see
+ * `loadConfig` below for the matching default on read. `rememberKey` is
+ * still respected as an explicit opt-out: unchecking "Remember API key on
+ * this device" in AISettings persists everything except the key itself,
+ * for shared/public-computer use.
  */
 export function saveConfig(config: ProviderConfig, rememberKey: boolean): void {
   const toStore: Partial<ProviderConfig> = {
@@ -35,10 +38,24 @@ export function saveConfig(config: ProviderConfig, rememberKey: boolean): void {
 export function loadConfig(): { config: Partial<ProviderConfig>; rememberKey: boolean } {
   try {
     const raw = localStorage.getItem(CONFIG_KEY);
-    const rememberKey = localStorage.getItem(REMEMBER_KEY) === "true";
-    return { config: raw ? JSON.parse(raw) : {}, rememberKey };
+    // No REMEMBER_KEY entry yet means this is a first-ever visit (or an
+    // install from before this default changed) — default to remembering,
+    // so a key typed in survives a refresh without an extra opt-in step.
+    const storedRemember = localStorage.getItem(REMEMBER_KEY);
+    const rememberKey = storedRemember === null ? true : storedRemember === "true";
+
+    const parsed: unknown = raw ? JSON.parse(raw) : {};
+    // Guard against corrupted/unexpected data (e.g. manually edited
+    // localStorage, or a value from an incompatible older version) so a
+    // bad value can't crash startup — fall back to an empty config.
+    const config =
+      parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Partial<ProviderConfig>)
+        : {};
+
+    return { config, rememberKey };
   } catch {
-    return { config: {}, rememberKey: false };
+    return { config: {}, rememberKey: true };
   }
 }
 
