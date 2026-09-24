@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { TextField } from "../components/ui/TextField";
 import { SelectPills } from "../components/ui/SelectPills";
@@ -76,7 +75,8 @@ export function AISettings() {
         </p>
       </div>
 
-      <Card className="p-6 flex flex-col gap-5">
+      <div className="flex flex-col divide-y divide-ink-3">
+        <div className="pb-6 flex flex-col gap-5">
         <div>
           <label className="text-sm font-semibold text-paper/80 mb-2 block">AI Provider</label>
           <SelectPills
@@ -197,27 +197,28 @@ export function AISettings() {
             <span>Connection failed. {conn.message}</span>
           </div>
         )}
-      </Card>
+        </div>
 
-      <Card className="p-5 text-xs text-paper/50 leading-relaxed">
-        <p className="font-semibold text-paper/70 mb-1">BYOK</p>
-        <p>
-          This application uses your own AI API key. API usage and costs are billed directly by your selected AI
-          provider. StudyKey does not provide AI credits and does not sell or share your key.
-        </p>
-      </Card>
+        <div className="py-6 text-xs text-paper/50 leading-relaxed">
+          <p className="font-semibold text-paper/70 mb-1">BYOK</p>
+          <p>
+            This application uses your own AI API key. API usage and costs are billed directly by your selected AI
+            provider. StudyKey does not provide AI credits and does not sell or share your key.
+          </p>
+        </div>
 
-      <Card className="p-5">
-        <label className="flex items-center gap-2.5 text-sm font-semibold py-1">
-          <input type="checkbox" checked={devMode} onChange={(e) => setDevMode(e.target.checked)} className="accent-signal w-5 h-5 flex-shrink-0" />
-          Developer mode
-        </label>
-        {devMode && (
-          <div className="mt-3 rounded-xl bg-ink px-3 py-2 font-mono text-xs text-paper/70 h-32 overflow-y-auto">
-            {debugLog.length === 0 ? <p className="text-paper/30">No requests yet.</p> : debugLog.map((l, i) => <div key={i}>{l}</div>)}
-          </div>
-        )}
-      </Card>
+        <div className="pt-6">
+          <label className="flex items-center gap-2.5 text-sm font-semibold py-1">
+            <input type="checkbox" checked={devMode} onChange={(e) => setDevMode(e.target.checked)} className="accent-signal w-5 h-5 flex-shrink-0" />
+            Developer mode
+          </label>
+          {devMode && (
+            <div className="mt-3 rounded-xl bg-ink px-3 py-2 font-mono text-xs text-paper/70 h-32 overflow-y-auto">
+              {debugLog.length === 0 ? <p className="text-paper/30">No requests yet.</p> : debugLog.map((l, i) => <div key={i}>{l}</div>)}
+            </div>
+          )}
+        </div>
+      </div>
 
       <button
         type="button"

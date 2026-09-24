@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { KeyRound } from "lucide-react";
-import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 
 export function NotConfiguredBanner() {
   return (
-    <Card className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+    <div className="rounded-2xl border-2 border-amber/40 bg-amber/5 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
       <span className="w-11 h-11 rounded-xl bg-amber/15 text-amber flex items-center justify-center flex-shrink-0">
         <KeyRound className="w-5 h-5" />
       </span>
@@ -18,6 +17,6 @@ export function NotConfiguredBanner() {
       <Link to="/ai-settings">
         <Button variant="primary">Configure AI</Button>
       </Link>
-    </Card>
+    </div>
   );
 }

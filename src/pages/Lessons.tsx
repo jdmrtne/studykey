@@ -179,72 +179,74 @@ export function Lessons() {
         <h2 className="font-display font-semibold text-sm text-paper/80">Your lessons ({lessons.length})</h2>
 
         {lessons.length === 0 && (
-          <Card className="p-8 flex flex-col items-center text-center gap-2">
+          <div className="py-8 flex flex-col items-center text-center gap-2">
             <span className="w-10 h-10 rounded-xl bg-ink-3 flex items-center justify-center text-paper/40">
               <BookOpen className="w-5 h-5" />
             </span>
             <p className="text-sm text-paper/50">No lessons yet — upload a file or paste text above to create your first one.</p>
-          </Card>
+          </div>
         )}
 
-        {lessons.map((lesson) => {
-          const active = lesson.id === selectedLessonId;
-          const { label: kindLabel, icon: KindIcon } = fileKind(lesson.sourceFileName);
-          return (
-            <Card
-              key={lesson.id}
-              className={clsx(
-                "p-4 flex items-center gap-4 transition-colors",
-                active ? "border-signal/60 bg-signal/5" : "hover:border-ink-3"
-              )}
-            >
-              <span
+        <div className="flex flex-col divide-y divide-ink-3">
+          {lessons.map((lesson) => {
+            const active = lesson.id === selectedLessonId;
+            const { label: kindLabel, icon: KindIcon } = fileKind(lesson.sourceFileName);
+            return (
+              <div
+                key={lesson.id}
                 className={clsx(
-                  "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                  active ? "bg-signal/15 text-signal" : "bg-ink-3 text-paper/60"
+                  "py-4 px-3 -mx-3 rounded-xl flex items-center gap-4 transition-colors",
+                  active && "bg-signal/5"
                 )}
               >
-                <KindIcon className="w-5 h-5" />
-              </span>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-sm truncate">{lesson.title}</p>
-                  {active && (
-                    <span className="flex items-center gap-1 text-[11px] font-semibold text-signal flex-shrink-0">
-                      <CheckCircle2 className="w-3 h-3" /> Active
-                    </span>
+                <span
+                  className={clsx(
+                    "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
+                    active ? "bg-signal/15 text-signal" : "bg-ink-3 text-paper/60"
                   )}
-                </div>
-                <p className="text-xs text-paper/40 flex items-center gap-1.5 flex-wrap mt-0.5">
-                  <span>{kindLabel}</span>
-                  <span aria-hidden="true">·</span>
-                  <Layers className="w-3 h-3" /> {lesson.chunks.length} chunk{lesson.chunks.length === 1 ? "" : "s"}
-                  <span aria-hidden="true">·</span>~{estimateTokens(lesson.rawText)} tokens
-                  <span aria-hidden="true">·</span>
-                  {timeAgo(lesson.createdAt)}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {!active && (
-                  <Button variant="ghost" size="md" onClick={() => selectLesson(lesson.id)} className="!px-3 !py-2 !text-xs">
-                    Select
-                  </Button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => removeLesson(lesson.id)}
-                  className="text-paper/30 hover:text-danger transition-colors p-2 tap-target flex items-center justify-center touch-manipulation"
-                  aria-label={`Remove ${lesson.title}`}
-                  title="Remove lesson"
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                  <KindIcon className="w-5 h-5" />
+                </span>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-sm truncate">{lesson.title}</p>
+                    {active && (
+                      <span className="flex items-center gap-1 text-[11px] font-semibold text-signal flex-shrink-0">
+                        <CheckCircle2 className="w-3 h-3" /> Active
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-paper/40 flex items-center gap-1.5 flex-wrap mt-0.5">
+                    <span>{kindLabel}</span>
+                    <span aria-hidden="true">·</span>
+                    <Layers className="w-3 h-3" /> {lesson.chunks.length} chunk{lesson.chunks.length === 1 ? "" : "s"}
+                    <span aria-hidden="true">·</span>~{estimateTokens(lesson.rawText)} tokens
+                    <span aria-hidden="true">·</span>
+                    {timeAgo(lesson.createdAt)}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {!active && (
+                    <Button variant="ghost" size="md" onClick={() => selectLesson(lesson.id)} className="!px-3 !py-2 !text-xs">
+                      Select
+                    </Button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeLesson(lesson.id)}
+                    className="text-paper/30 hover:text-danger transition-colors p-2 tap-target flex items-center justify-center touch-manipulation"
+                    aria-label={`Remove ${lesson.title}`}
+                    title="Remove lesson"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </Card>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

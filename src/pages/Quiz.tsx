@@ -106,12 +106,12 @@ export function Quiz() {
       </Card>
 
       {questions && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col divide-y divide-ink-3">
           {questions.map((q, i) => {
             const picked = answers[q.id];
             const isCorrect = picked !== undefined && picked.trim().toLowerCase() === q.answer.trim().toLowerCase();
             return (
-              <Card key={q.id} className="p-5 flex flex-col gap-3">
+              <div key={q.id} className="py-5 first:pt-0 flex flex-col gap-3">
                 <p className="font-semibold text-sm">
                   {i + 1}. {q.question}
                 </p>
@@ -191,7 +191,7 @@ export function Quiz() {
                     </p>
                   </div>
                 )}
-              </Card>
+              </div>
             );
           })}
         </div>
