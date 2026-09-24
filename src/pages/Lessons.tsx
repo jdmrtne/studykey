@@ -1,4 +1,6 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { saveOriginal } from "../lib/fileStore";
 import clsx from "clsx";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
@@ -24,6 +26,7 @@ function fileKind(sourceFileName: string | undefined): { label: string; icon: ty
   const name = sourceFileName.toLowerCase();
   if (name.endsWith(".pdf")) return { label: "PDF", icon: FileType };
   if (name.endsWith(".docx")) return { label: "Word", icon: FileType };
+  if (name.endsWith(".pptx")) return { label: "PowerPoint", icon: FileType };
   return { label: "Text", icon: FileText };
 }
 
@@ -53,6 +56,7 @@ export function Lessons() {
     setExtracting(file.name);
     try {
       const lesson = await buildLessonFromFile(file);
+      await saveOriginal(lesson.id, file); // keep the original so it can be read and downloaded later
       addLesson(lesson);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not read that file.");
@@ -126,13 +130,13 @@ export function Lessons() {
                     <Upload className="w-6 h-6" />
                   </span>
                   <p className="text-sm font-semibold text-paper/80">Drop a lesson file here, or click to browse</p>
-                  <p className="text-xs text-paper/40">Supports .txt, .md, .pdf, and .docx</p>
+                  <p className="text-xs text-paper/40">Supports .txt, .md, .pdf, .docx, and .pptx</p>
                 </>
               )}
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".txt,.md,.markdown,.pdf,.docx"
+                accept=".txt,.md,.markdown,.pdf,.docx,.pptx"
                 className="hidden"
                 disabled={!!extracting}
                 onChange={(e) => {
@@ -144,7 +148,7 @@ export function Lessons() {
             </div>
             <p className="text-xs text-paper/40">
               PDF text extraction only reads the text layer — scanned/image-only PDFs won't work (no OCR yet). Old
-              .doc files need to be re-saved as .docx first.
+              .doc and .ppt files need to be re-saved as .docx / .pptx first.
             </p>
           </div>
         ) : (
@@ -228,6 +232,13 @@ export function Lessons() {
                 </div>
 
                 <div className="flex items-center gap-1 flex-shrink-0">
+                  <Link
+                    to={`/lessons/${lesson.id}/read`}
+                    className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink-3 px-3 min-h-[2.5rem] text-xs font-semibold hover:border-signal/50 transition-colors touch-manipulation"
+                    aria-label={`Read ${lesson.title}`}
+                  >
+                    <BookOpen className="w-3.5 h-3.5" aria-hidden="true" /> Read
+                  </Link>
                   {!active && (
                     <Button variant="ghost" size="md" onClick={() => selectLesson(lesson.id)} className="!px-3 !py-2 !text-xs">
                       Select

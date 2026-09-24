@@ -12,7 +12,7 @@ import type { Lesson, LessonChunk } from "../types/lesson";
  */
 
 const TEXT_EXTENSIONS = [".txt", ".md", ".markdown"];
-const SUPPORTED_EXTENSIONS = [...TEXT_EXTENSIONS, ".pdf", ".docx"];
+const SUPPORTED_EXTENSIONS = [...TEXT_EXTENSIONS, ".pdf", ".docx", ".pptx"];
 
 export async function extractText(file: File): Promise<string> {
   const name = file.name.toLowerCase();
@@ -29,6 +29,17 @@ export async function extractText(file: File): Promise<string> {
     return await extractDocxText(file);
   }
 
+  if (name.endsWith(".pptx")) {
+    return await extractPptxText(file);
+  }
+
+  if (name.endsWith(".ppt")) {
+    throw new Error(
+      `"${file.name}" is an old .ppt file — Memora can only read the newer .pptx format. ` +
+        `Re-save it as .pptx in PowerPoint and re-upload, or paste the text directly.`
+    );
+  }
+
   if (name.endsWith(".doc")) {
     throw new Error(
       `"${file.name}" is an old .doc file — Memora can only read the newer .docx format. ` +
@@ -37,7 +48,7 @@ export async function extractText(file: File): Promise<string> {
   }
 
   throw new Error(
-    `"${file.name}" isn't a supported format. Memora reads .txt, .md, .pdf, and .docx files — ` +
+    `"${file.name}" isn't a supported format. Memora reads .txt, .md, .pdf, .docx, and .pptx files — ` +
       `for anything else, copy/paste the text into the lesson box instead.`
   );
 }
@@ -80,6 +91,15 @@ async function extractDocxText(file: File): Promise<string> {
     throw new Error(`Couldn't find any text in "${file.name}" — the document may be empty or image-only.`);
   }
   return result.value;
+}
+
+async function extractPptxText(file: File): Promise<string> {
+  const { parsePptx, slidesToText } = await import("./pptx");
+  const text = slidesToText(await parsePptx(await file.arrayBuffer()));
+  if (!text.replace(/##[^\n]*/g, "").trim()) {
+    throw new Error(`Couldn't find any text in "${file.name}" — the slides may contain only images.`);
+  }
+  return text;
 }
 
 export function isSupportedLessonFile(fileName: string): boolean {

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Lesson } from "../types/lesson";
+import { deleteOriginal } from "../lib/fileStore";
 
 const STORAGE_KEY = "studykey-lessons";
 const SELECTED_KEY = "studykey-selected-lesson";
@@ -78,6 +79,7 @@ export const useLessonsStore = create<LessonsState>((set, get) => ({
 
   removeLesson: (id) => {
     const next = get().lessons.filter((l) => l.id !== id);
+    void deleteOriginal(id);
     set({ lessons: next });
     persistLessons(next);
     if (get().selectedLessonId === id) {

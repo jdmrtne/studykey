@@ -94,7 +94,7 @@ export function AppShell() {
   const headerTitle = HEADER_TITLES[location.pathname];
   // Chat is a fixed-viewport screen: the page itself never scrolls, only the message list does,
   // so the chat header, input and quick actions stay put.
-  const locked = location.pathname === "/chat";
+  const locked = location.pathname === "/chat" || /^\/lessons\/[^/]+\/read$/.test(location.pathname);
 
   return (
     <div className={clsx("flex flex-col md:flex-row", locked ? "app-viewport-locked" : "min-h-screen")}>

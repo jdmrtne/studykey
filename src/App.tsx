@@ -3,6 +3,7 @@ import { ThemeProvider } from "./hooks/useTheme";
 import { AppShell } from "./components/layout/AppShell";
 import { Dashboard } from "./pages/Dashboard";
 import { Lessons } from "./pages/Lessons";
+import { LessonReader } from "./pages/LessonReader";
 import { Quiz } from "./pages/Quiz";
 import { Flashcards } from "./pages/Flashcards";
 import { Reviewer } from "./pages/Reviewer";
@@ -19,6 +20,7 @@ export default function App() {
           <Route element={<AppShell />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/lessons" element={<Lessons />} />
+            <Route path="/lessons/:id/read" element={<LessonReader />} />
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/reviewer" element={<Reviewer />} />
