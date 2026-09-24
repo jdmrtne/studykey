@@ -18,7 +18,7 @@ function statusLabel(s: ReaderSource | null): string {
     case "pdf":
       return s.converted ? "Document preview" : "Original document";
     case "docx-html":
-      return "Web preview";
+      return "Content preview";
     case "pptx-slides":
       return "Content preview";
     case "text":
@@ -132,7 +132,7 @@ export function LessonReader() {
           onError={onPdfError}
         />
       )}
-      {source?.mode === "docx-html" && <DocxHtmlReader html={source.html} />}
+      {source?.mode === "docx-html" && <DocxHtmlReader html={source.html} lessonId={lesson.id} />}
       {source?.mode === "pptx-slides" && <PptxSlidesReader slides={source.slides} lessonId={lesson.id} />}
       {source?.mode === "text" && (
         <>
