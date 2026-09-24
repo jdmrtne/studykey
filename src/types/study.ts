@@ -28,15 +28,32 @@ export interface FlashcardSet {
   cards: Flashcard[];
 }
 
+export interface ReviewerTerm {
+  term: string;
+  definition: string;
+}
+
 export interface ReviewerSection {
   heading: string;
   summary: string;
   keyPoints: string[];
+  /** Vocabulary defined in this section. Optional — older or sparser AI output may omit it. */
+  keyTerms?: ReviewerTerm[];
+  /** One short memory hook (mnemonic, rule of thumb, comparison). */
+  remember?: string;
+  /** Common mix-ups or exam traps for this section. */
+  watchOut?: string[];
+  /** One question the student can answer from memory, then reveal the answer. */
+  selfCheck?: { question: string; answer: string };
   source: SourceRef;
 }
 
 export interface Reviewer {
   title: string;
+  /** 2-3 sentence big picture of the whole lesson. */
+  overview?: string;
+  /** The handful of things that must not be forgotten. */
+  mustKnow?: string[];
   sections: ReviewerSection[];
 }
 
@@ -84,6 +101,10 @@ export function isReviewer(v: unknown): v is Reviewer {
       typeof s.heading === "string" &&
       typeof s.summary === "string" &&
       Array.isArray(s.keyPoints) &&
-      isSourceRef(s.source)
+      isSourceRef(s.source) &&
+      // The extras are optional; the renderer defensively ignores malformed entries, so only reject
+      // values that are the wrong *kind* of thing entirely.
+      (s.keyTerms === undefined || Array.isArray(s.keyTerms)) &&
+      (s.watchOut === undefined || Array.isArray(s.watchOut))
   );
 }

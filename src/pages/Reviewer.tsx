@@ -9,6 +9,7 @@ import { useLessonsStore, selectSelectedLesson } from "../store/lessonsStore";
 import { generateJSON } from "../lib/aiService";
 import { generateReviewerPrompt } from "../prompts/generateReviewer";
 import { isReviewer, type Reviewer as ReviewerType } from "../types/study";
+import { ReviewerView } from "../components/reviewer/ReviewerView";
 import { Loader2 } from "lucide-react";
 
 export function Reviewer() {
@@ -46,7 +47,7 @@ export function Reviewer() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl w-full mx-auto">
+    <div className="flex flex-col gap-6 max-w-3xl w-full mx-auto">
       <h1 className="text-2xl font-display font-bold">Reviewer</h1>
 
       <Card className="p-6 flex flex-col gap-5">
@@ -61,25 +62,7 @@ export function Reviewer() {
         {error !== null && <AIErrorNotice error={error} onRetry={handleGenerate} />}
       </Card>
 
-      {reviewer && (
-        <Card className="p-5 sm:p-6 flex flex-col gap-6">
-          <h2 className="text-xl font-display font-bold">{reviewer.title}</h2>
-          {reviewer.sections.map((s, i) => (
-            <div key={i} className="flex flex-col gap-2 pb-5 border-b border-ink-3 last:border-0 last:pb-0">
-              <h3 className="font-display font-semibold">{s.heading}</h3>
-              <p className="text-sm text-paper/70">{s.summary}</p>
-              <ul className="list-disc list-inside text-sm text-paper/70 flex flex-col gap-1">
-                {s.keyPoints.map((k, j) => (
-                  <li key={j}>{k}</li>
-                ))}
-              </ul>
-              <p className="text-xs text-paper/30">
-                Source: {s.source.section} · chunk {s.source.chunk}
-              </p>
-            </div>
-          ))}
-        </Card>
-      )}
+      {reviewer && <ReviewerView reviewer={reviewer} />}
     </div>
   );
 }
