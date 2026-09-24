@@ -29,7 +29,7 @@ function timeAgo(ts: number): string {
 
 export function ChatHistoryMenu({ threads, lessonTitles, activeId, onNew, onOpen, onDelete, onClearAll }: Props) {
   return (
-    <div className="w-[min(22rem,calc(100vw-2rem))] rounded-2xl border border-ink-3 bg-ink-2 shadow-2xl overflow-hidden flex flex-col">
+    <div className="w-full rounded-2xl border border-ink-3 bg-ink-2 shadow-2xl overflow-hidden flex flex-col">
       <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
         <p className="text-sm font-display font-semibold">Chat history</p>
         <button

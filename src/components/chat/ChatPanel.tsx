@@ -91,7 +91,7 @@ export function ChatPanel({ lesson, config }: Props) {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Lesson header — always visible so the student is never unsure which lesson is being discussed. */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 relative">
       <div className="flex items-center justify-between gap-3 px-4 md:px-8 py-3 max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2 min-w-0">
           <span className="w-8 h-8 rounded-lg bg-signal/15 text-signal flex items-center justify-center flex-shrink-0">
@@ -117,7 +117,9 @@ export function ChatPanel({ lesson, config }: Props) {
               <span className="hidden sm:inline">New chat</span>
             </button>
           )}
-          <div className="relative">
+          {/* Not positioned on mobile, so the history menu anchors to the whole header row (full width,
+              always on screen); from sm up it hangs under this button like the other dropdowns. */}
+          <div className="sm:relative">
             <button
               type="button"
               onClick={() => {
@@ -143,7 +145,7 @@ export function ChatPanel({ lesson, config }: Props) {
             {historyOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setHistoryOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-20">
+                <div className="absolute inset-x-3 top-full mt-1 z-20 sm:inset-x-auto sm:right-0 sm:w-[22rem]">
                   <ChatHistoryMenu
                     threads={sortedThreads}
                     lessonTitles={lessonTitles}
