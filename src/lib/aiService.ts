@@ -77,8 +77,18 @@ export async function generateJSON<T>(
         : req.systemPrompt,
     });
     const parsed = tryParseJSON(result.text);
-    if (parsed === undefined || !validate(parsed)) {
-      throw new AIServiceError("invalid_response", "The AI returned an unexpected response.");
+    if (parsed === undefined) {
+      // Almost always a reply that hit the output limit mid-JSON (reasoning models spend part of the limit thinking).
+      throw new AIServiceError(
+        "invalid_response",
+        "The AI's reply wasn't complete, valid JSON — it was most likely cut off by the output limit. Raise Max Output Tokens in AI Settings (try 8192 or more) and try again."
+      );
+    }
+    if (!validate(parsed)) {
+      throw new AIServiceError(
+        "invalid_response",
+        "The AI's reply was missing some required fields. Please try again."
+      );
     }
     return parsed;
   };

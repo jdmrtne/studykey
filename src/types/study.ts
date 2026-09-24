@@ -104,7 +104,8 @@ export function isReviewer(v: unknown): v is Reviewer {
       isSourceRef(s.source) &&
       // The extras are optional; the renderer defensively ignores malformed entries, so only reject
       // values that are the wrong *kind* of thing entirely.
-      (s.keyTerms === undefined || Array.isArray(s.keyTerms)) &&
-      (s.watchOut === undefined || Array.isArray(s.watchOut))
+      // Models often emit null (not "omitted") for optional fields they have nothing for, so accept null too.
+      (s.keyTerms == null || Array.isArray(s.keyTerms)) &&
+      (s.watchOut == null || Array.isArray(s.watchOut))
   );
 }

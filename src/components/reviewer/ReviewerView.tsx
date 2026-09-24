@@ -34,10 +34,16 @@ const terms = (v: unknown): ReviewerTerm[] =>
 
 interface Props {
   reviewer: Reviewer;
+  /** Sections already marked reviewed (restored from the saved reviewer). Only read on first render — remount via `key` to reset. */
+  initialReviewed?: number[];
+  /** Called whenever the reviewed set changes, so the caller can save progress. */
+  onReviewedChange?: (sections: number[]) => void;
 }
 
-export function ReviewerView({ reviewer }: Props) {
-  const [reviewed, setReviewed] = useState<Set<number>>(new Set());
+export function ReviewerView({ reviewer, initialReviewed, onReviewedChange }: Props) {
+  const [reviewed, setReviewed] = useState<Set<number>>(
+    () => new Set((initialReviewed ?? []).filter((n) => n >= 0 && n < reviewer.sections.length))
+  );
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
 
   const stats = useMemo(() => {
@@ -54,13 +60,21 @@ export function ReviewerView({ reviewer }: Props) {
   const progress = total === 0 ? 0 : Math.round((reviewed.size / total) * 100);
   const allCollapsed = collapsed.size === total && total > 0;
 
-  function toggle(setter: typeof setReviewed, i: number) {
-    setter((prev) => {
+  function toggleCollapsed(i: number) {
+    setCollapsed((prev) => {
       const next = new Set(prev);
       if (next.has(i)) next.delete(i);
       else next.add(i);
       return next;
     });
+  }
+
+  function toggleReviewed(i: number) {
+    const next = new Set(reviewed);
+    if (next.has(i)) next.delete(i);
+    else next.add(i);
+    setReviewed(next);
+    onReviewedChange?.([...next].sort((a, b) => a - b));
   }
 
   function jumpTo(i: number) {
@@ -183,8 +197,8 @@ export function ReviewerView({ reviewer }: Props) {
           accent={ACCENTS[i % ACCENTS.length]}
           isOpen={!collapsed.has(i)}
           isReviewed={reviewed.has(i)}
-          onToggleOpen={() => toggle(setCollapsed, i)}
-          onToggleReviewed={() => toggle(setReviewed, i)}
+          onToggleOpen={() => toggleCollapsed(i)}
+          onToggleReviewed={() => toggleReviewed(i)}
         />
       ))}
 

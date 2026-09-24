@@ -23,7 +23,15 @@ async function callGemini(config: ProviderConfig, req: GenerateRequest): Promise
         generationConfig: {
           temperature: req.temperature ?? config.temperature,
           maxOutputTokens: req.maxOutputTokens ?? config.maxOutputTokens ?? 4096,
-          ...(req.jsonMode ? { responseMimeType: "application/json" } : {}),
+          ...(req.jsonMode
+            ? {
+                responseMimeType: "application/json",
+                // Gemini 2.5 models "think" before answering and that thinking counts against maxOutputTokens,
+                // which can leave too little room for a long JSON reply and cut it off. Cap it for structured output
+                // (Flash can turn thinking off entirely; Pro can't go below a small minimum).
+                thinkingConfig: { thinkingBudget: /flash/i.test(config.model) ? 0 : 1024 },
+              }
+            : {}),
         },
       }),
     });
