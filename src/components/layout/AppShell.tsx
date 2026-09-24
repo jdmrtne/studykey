@@ -113,19 +113,10 @@ export function AppShell() {
       {/* ---------- Desktop sidebar (hidden on mobile) ---------- */}
       <aside
         className={clsx(
-          "hidden md:flex md:min-h-screen md:flex-col border-r border-ink-3 bg-ink-2/60 backdrop-blur-sm transition-[width] duration-200 flex-shrink-0 relative",
+          "hidden md:flex md:min-h-screen md:flex-col border-r border-ink-3 bg-ink-2/60 backdrop-blur-sm transition-[width] duration-200 flex-shrink-0",
           collapsed ? "md:w-[4.5rem]" : "md:w-60"
         )}
       >
-        <button
-          type="button"
-          onClick={() => setCollapsed((c) => !c)}
-          className="hidden md:flex absolute top-5 -right-3 w-6 h-6 rounded-full border border-ink-3 bg-ink-2 items-center justify-center text-paper/50 hover:text-paper hover:border-signal/50 transition-colors z-10"
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <PanelLeftOpen className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-3.5 h-3.5" />}
-        </button>
         <div
           className={clsx(
             "flex items-center border-b border-ink-3 flex-shrink-0",
@@ -174,6 +165,25 @@ export function AppShell() {
             );
           })}
         </nav>
+        <div className={clsx("border-t border-ink-3 flex-shrink-0", collapsed ? "px-2 py-2" : "px-2 py-2")}>
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            className={clsx(
+              "flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors w-full text-paper/60 hover:bg-ink-3/60 hover:text-paper",
+              collapsed ? "justify-center px-0" : "px-3"
+            )}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? (
+              <PanelLeftOpen className="w-4 h-4 flex-shrink-0" />
+            ) : (
+              <PanelLeftClose className="w-4 h-4 flex-shrink-0" />
+            )}
+            {!collapsed && <span>Collapse</span>}
+          </button>
+        </div>
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col">
