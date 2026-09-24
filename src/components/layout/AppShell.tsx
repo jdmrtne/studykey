@@ -210,7 +210,7 @@ export function AppShell() {
                 <span className="w-px h-4 bg-ink-3 flex-shrink-0" aria-hidden="true" />
               </>
             ) : null}
-            <BookMarked className="w-4 h-4 text-paper/40 flex-shrink-0" />
+            <BookMarked className={clsx("w-4 h-4 text-paper/40 flex-shrink-0", headerTitle && "hidden md:block")} />
             {lessons.length === 0 ? (
               <p className="text-xs text-paper/40 truncate">
                 No lesson yet —{" "}
@@ -221,14 +221,19 @@ export function AppShell() {
               </p>
             ) : (
               <>
-                <span className="text-xs text-paper/40 flex-shrink-0 hidden sm:inline">Studying:</span>
-                <span className="text-xs font-semibold text-paper/90 truncate min-w-0">
+                {/* On phones the lesson picker on the right already shows the lesson's name, so this text is desktop-only. */}
+                <span className="text-xs text-paper/40 flex-shrink-0 hidden md:inline">Studying:</span>
+                <span className="text-xs font-semibold text-paper/90 truncate min-w-0 hidden md:inline">
                   {selectedLesson ? selectedLesson.title : "No lesson selected"}
                 </span>
               </>
             )}
-            <div className="ml-auto flex items-center gap-2 md:gap-3 flex-shrink-0">
-              {lessons.length > 0 && <LessonPicker compact />}
+            <div className="ml-auto flex items-center gap-2 md:gap-3 min-w-0 flex-1 md:flex-none justify-end">
+              {lessons.length > 0 && (
+                <div className="min-w-0 flex-1 md:flex-none md:max-w-[12rem]">
+                  <LessonPicker compact />
+                </div>
+              )}
               <div className="hidden md:block">
                 <ThemeToggle />
               </div>

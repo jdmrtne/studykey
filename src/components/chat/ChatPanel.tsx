@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MessageCircleQuestion, SquarePen, ChevronDown, History } from "lucide-react";
+import { SquarePen, History } from "lucide-react";
 import type { Lesson } from "../../types/lesson";
 import type { ProviderConfig } from "../../lib/providers/types";
 import { useChatStore, selectMessages, selectActiveThreadId } from "../../store/chatStore";
 import { useLessonsStore } from "../../store/lessonsStore";
-import { LessonPicker } from "../ai/LessonPicker";
 import { ChatMessage } from "./ChatMessage";
 import { ChatHistoryMenu } from "./ChatHistoryMenu";
 import { ChatStarterPrompts } from "./ChatStarterPrompts";
@@ -32,7 +31,6 @@ export function ChatPanel({ lesson, config }: Props) {
   const sortedThreads = useMemo(() => [...allThreads].sort((a, b) => b.updatedAt - a.updatedAt), [allThreads]);
   const lessonTitles = useMemo(() => Object.fromEntries(lessons.map((l) => [l.id, l.title])), [lessons]);
 
-  const [switcherOpen, setSwitcherOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -66,9 +64,8 @@ export function ChatPanel({ lesson, config }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // Close the inline lesson switcher whenever the active lesson actually changes.
+  // Close the history menu whenever the active lesson changes.
   useEffect(() => {
-    setSwitcherOpen(false);
     setHistoryOpen(false);
   }, [lesson.id]);
 
@@ -90,54 +87,29 @@ export function ChatPanel({ lesson, config }: Props) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Lesson header — always visible so the student is never unsure which lesson is being discussed. */}
+      {/* Slim action row. The lesson's name and the lesson picker live in the top bar (AppShell), so they are
+          not repeated here. History is a labeled button so it's easy to notice. */}
       <div className="flex-shrink-0 relative">
-      <div className="flex items-center justify-between gap-3 px-4 md:px-8 py-3 max-w-5xl mx-auto w-full">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="w-8 h-8 rounded-lg bg-signal/15 text-signal flex items-center justify-center flex-shrink-0">
-            <MessageCircleQuestion className="w-4 h-4" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide text-paper/40 font-semibold leading-none mb-0.5">
-              Lesson
-            </p>
-            <p className="text-sm font-display font-semibold truncate">{lesson.title}</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {messages.length > 0 && (
-            <button
-              type="button"
-              onClick={() => newChat(lesson.id)}
-              title="Start a new chat (this one stays in your history)"
-              className="flex items-center gap-1.5 text-xs text-paper/50 hover:text-signal transition-colors px-2 py-1.5"
-            >
-              <SquarePen className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">New chat</span>
-            </button>
-          )}
-          {/* Not positioned on mobile, so the history menu anchors to the whole header row (full width,
-              always on screen); from sm up it hangs under this button like the other dropdowns. */}
+        <div className="flex items-center justify-between gap-2 px-4 md:px-8 py-2 max-w-5xl mx-auto w-full">
+          {/* Not positioned on mobile, so the history menu anchors to the whole row (full width, always on screen);
+              from sm up it hangs under this button. */}
           <div className="sm:relative">
             <button
               type="button"
-              onClick={() => {
-                setHistoryOpen((v) => !v);
-                setSwitcherOpen(false);
-              }}
-              title="Chat history"
+              onClick={() => setHistoryOpen((v) => !v)}
               aria-haspopup="dialog"
               aria-expanded={historyOpen}
               className={
-                "flex items-center gap-1.5 text-xs transition-colors px-2 py-1.5 " +
-                (historyOpen ? "text-signal" : "text-paper/50 hover:text-signal")
+                "flex items-center gap-2 rounded-full border-2 px-3.5 py-1.5 text-sm font-semibold transition-colors touch-manipulation " +
+                (historyOpen
+                  ? "border-signal text-signal bg-signal/10"
+                  : "border-ink-3 bg-ink-2 text-paper/80 hover:border-signal/50 hover:text-paper")
               }
             >
-              <History className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">History</span>
+              <History className="w-4 h-4" />
+              History
               {sortedThreads.length > 0 && (
-                <span className="text-[10px] font-semibold rounded-full bg-ink-3 text-paper/70 px-1.5 leading-4">
+                <span className="text-[11px] font-bold rounded-full bg-signal text-night px-1.5 min-w-[1.25rem] text-center leading-5">
                   {sortedThreads.length}
                 </span>
               )}
@@ -145,7 +117,7 @@ export function ChatPanel({ lesson, config }: Props) {
             {historyOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setHistoryOpen(false)} />
-                <div className="absolute inset-x-3 top-full mt-1 z-20 sm:inset-x-auto sm:right-0 sm:w-[22rem]">
+                <div className="absolute inset-x-3 top-full mt-1 z-20 sm:inset-x-auto sm:left-0 sm:w-[22rem]">
                   <ChatHistoryMenu
                     threads={sortedThreads}
                     lessonTitles={lessonTitles}
@@ -175,29 +147,19 @@ export function ChatPanel({ lesson, config }: Props) {
               </>
             )}
           </div>
-          <div className="relative">
+
+          {messages.length > 0 && (
             <button
               type="button"
-              onClick={() => {
-                setSwitcherOpen((v) => !v);
-                setHistoryOpen(false);
-              }}
-              className="flex items-center gap-1 text-xs font-semibold text-signal hover:underline px-2 py-1.5"
+              onClick={() => newChat(lesson.id)}
+              title="Start a new chat (this one stays in your history)"
+              className="flex items-center gap-2 rounded-full bg-signal/10 text-signal px-3.5 py-1.5 text-sm font-semibold hover:bg-signal/20 transition-colors touch-manipulation"
             >
-              Change
-              <ChevronDown className="w-3.5 h-3.5" />
+              <SquarePen className="w-4 h-4" />
+              New chat
             </button>
-            {switcherOpen && (
-              <>
-                <div className="fixed inset-0 z-0" onClick={() => setSwitcherOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 z-10">
-                  <LessonPicker compact />
-                </div>
-              </>
-            )}
-          </div>
+          )}
         </div>
-      </div>
       </div>
 
       {/* Message list — spans the full width so its scrollbar sits at the window's right edge;
@@ -212,11 +174,8 @@ export function ChatPanel({ lesson, config }: Props) {
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8">
             <div className="text-center">
-              <p className="font-display font-semibold text-paper/90">What would you like explained?</p>
-              <p className="text-sm text-paper/50 mt-1">
-                Ask anything about <span className="text-paper/70">{lesson.title}</span> — I'll answer from the
-                lesson itself.
-              </p>
+              <p className="font-display font-semibold text-paper/90">What would you like to know?</p>
+              <p className="text-sm text-paper/50 mt-1">Answers come from your lesson. Try one of these to start:</p>
             </div>
             <ChatStarterPrompts onPick={handleSend} disabled={isBusy} />
           </div>
@@ -243,7 +202,7 @@ export function ChatPanel({ lesson, config }: Props) {
           className="pointer-events-auto max-w-5xl mx-auto w-full px-4 md:px-8"
           onWheel={(e) => scrollRef.current?.scrollBy({ top: e.deltaY })}
         >
-          <ChatInput onSend={handleSend} disabled={isBusy} />
+          <ChatInput onSend={handleSend} disabled={isBusy} showQuickActions={messages.length > 0} />
         </div>
       </div>
       </div>

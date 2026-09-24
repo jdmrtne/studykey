@@ -19,9 +19,11 @@ const QUICK_ACTIONS: QuickAction[] = [
 interface Props {
   onSend: (text: string) => void;
   disabled?: boolean;
+  /** Hidden on an empty chat, where the starter prompts already offer the same shortcuts. */
+  showQuickActions?: boolean;
 }
 
-export function ChatInput({ onSend, disabled }: Props) {
+export function ChatInput({ onSend, disabled, showQuickActions = true }: Props) {
   const [draft, setDraft] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -42,7 +44,7 @@ export function ChatInput({ onSend, disabled }: Props) {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex md:flex-wrap gap-2 scroll-x-touch -mx-4 px-4 md:mx-0 md:px-0">
+      <div className={clsx("flex md:flex-wrap gap-2 scroll-x-touch -mx-4 px-4 md:mx-0 md:px-0", !showQuickActions && "hidden")}>
         {QUICK_ACTIONS.map((action) => (
           <button
             key={action.label}

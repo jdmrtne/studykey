@@ -33,7 +33,7 @@ export function LessonPicker({ compact, className }: Props) {
       className={clsx(
         "outline-none transition-colors",
         compact
-          ? "rounded-full border-2 border-ink-3 bg-ink-2 px-3 py-1.5 text-xs font-semibold text-paper focus:border-signal max-w-[12rem]"
+          ? "w-full rounded-full border-2 border-ink-3 bg-ink-2 px-3 py-1.5 text-xs font-semibold text-paper focus:border-signal"
           : "w-full rounded-2xl border-2 border-ink-3 bg-ink px-4 py-3 text-sm text-paper focus:border-signal",
         className
       )}
