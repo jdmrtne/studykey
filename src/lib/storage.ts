@@ -2,6 +2,14 @@ import type { ProviderConfig } from "./providers/types";
 
 const CONFIG_KEY = "studykey-ai-config";
 const REMEMBER_KEY = "studykey-ai-remember-key";
+/**
+ * Marks that REMEMBER_KEY was written by a build where "remember" defaults to ON.
+ * Older builds defaulted it to OFF and stored "false" for everyone who never touched the
+ * checkbox, which silently kept the key from ever being saved. Without this marker a stored
+ * "false" is treated as that old default, not as a deliberate opt-out.
+ */
+const VERSION_KEY = "studykey-ai-storage-v";
+const STORAGE_VERSION = "2";
 
 export interface StoredAIConfig extends ProviderConfig {
   /** Never itself persisted — derived from whether apiKey was saved. */
@@ -16,7 +24,7 @@ export interface StoredAIConfig extends ProviderConfig {
  * this device" in AISettings persists everything except the key itself,
  * for shared/public-computer use.
  */
-export function saveConfig(config: ProviderConfig, rememberKey: boolean): void {
+export function saveConfig(config: ProviderConfig, rememberKey: boolean): boolean {
   const toStore: Partial<ProviderConfig> = {
     provider: config.provider,
     model: config.model,
@@ -30,8 +38,13 @@ export function saveConfig(config: ProviderConfig, rememberKey: boolean): void {
   try {
     localStorage.setItem(CONFIG_KEY, JSON.stringify(toStore));
     localStorage.setItem(REMEMBER_KEY, rememberKey ? "true" : "false");
+    localStorage.setItem(VERSION_KEY, STORAGE_VERSION);
+    // Read it back: a write that "succeeded" but didn't stick is the same problem to the user.
+    return localStorage.getItem(CONFIG_KEY) === JSON.stringify(toStore);
   } catch {
-    // Best-effort only — storage may be unavailable (private browsing, quota).
+    // Storage may be unavailable or full (private browsing, quota shared with lessons/chat history).
+    // The caller surfaces this so the user isn't left thinking the key was saved.
+    return false;
   }
 }
 
@@ -42,7 +55,8 @@ export function loadConfig(): { config: Partial<ProviderConfig>; rememberKey: bo
     // install from before this default changed) — default to remembering,
     // so a key typed in survives a refresh without an extra opt-in step.
     const storedRemember = localStorage.getItem(REMEMBER_KEY);
-    const rememberKey = storedRemember === null ? true : storedRemember === "true";
+    const isCurrentVersion = localStorage.getItem(VERSION_KEY) === STORAGE_VERSION;
+    const rememberKey = storedRemember === null || !isCurrentVersion ? true : storedRemember === "true";
 
     const parsed: unknown = raw ? JSON.parse(raw) : {};
     // Guard against corrupted/unexpected data (e.g. manually edited
@@ -67,7 +81,9 @@ export function clearApiKey(): void {
       delete parsed.apiKey;
       localStorage.setItem(CONFIG_KEY, JSON.stringify(parsed));
     }
-    localStorage.setItem(REMEMBER_KEY, "false");
+    // Deliberately leaves the "remember" preference alone: clearing a key isn't opting out of
+    // remembering the next one. (It used to flip this to "false", so after a reload the next key
+    // you typed was never saved.)
   } catch {
     // no-op
   }
@@ -77,6 +93,7 @@ export function clearAllConfig(): void {
   try {
     localStorage.removeItem(CONFIG_KEY);
     localStorage.removeItem(REMEMBER_KEY);
+    localStorage.removeItem(VERSION_KEY);
   } catch {
     // no-op
   }

@@ -22,6 +22,7 @@ export function AISettings() {
   const {
     config,
     rememberKey,
+    saveFailed,
     devMode,
     setProvider,
     setApiKey,
@@ -170,6 +171,21 @@ export function AISettings() {
           <p className="text-xs text-amber -mt-3">
             Your API key is stored locally in this browser. Do not enable this on a shared/public computer.
           </p>
+        )}
+        {!rememberKey && (
+          <p className="text-xs text-paper/50 -mt-3">
+            Not remembered — you'll need to paste your key again after every refresh. Tick the box above to keep it.
+          </p>
+        )}
+        {saveFailed && (
+          <div className="flex items-start gap-2 text-danger text-sm">
+            <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <span>
+              Couldn't save to this browser's storage, so your key will be lost on refresh. Storage is probably full
+              (large lessons and chat history share the same limit) or blocked (private window / site data setting).
+              Try deleting a lesson you no longer need or clearing old chats, then re-enter your key.
+            </span>
+          </div>
         )}
 
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">

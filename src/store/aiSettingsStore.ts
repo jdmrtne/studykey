@@ -6,6 +6,8 @@ import { getAdapter } from "../lib/aiService";
 interface AISettingsState {
   config: ProviderConfig;
   rememberKey: boolean;
+  /** True when the last attempt to write settings to browser storage failed (storage full/blocked). */
+  saveFailed: boolean;
   devMode: boolean;
   setProvider: (provider: ProviderId) => void;
   setApiKey: (apiKey: string) => void;
@@ -34,7 +36,8 @@ export const useAISettingsStore = create<AISettingsState>((set, get) => {
   // version of this function was called explicitly.
   function persistNow() {
     const { config, rememberKey } = get();
-    saveConfig(config, rememberKey);
+    const ok = saveConfig(config, rememberKey);
+    if (get().saveFailed === ok) set({ saveFailed: !ok });
   }
 
   return {
@@ -47,6 +50,7 @@ export const useAISettingsStore = create<AISettingsState>((set, get) => {
       maxOutputTokens: storedConfig.maxOutputTokens ?? 4096,
     },
     rememberKey: storedRemember,
+    saveFailed: false,
     devMode: false,
 
     setProvider: (provider) => {
