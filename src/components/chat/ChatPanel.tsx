@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import { MessageCircleQuestion, RotateCcw, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MessageCircleQuestion, SquarePen, ChevronDown, History } from "lucide-react";
 import type { Lesson } from "../../types/lesson";
 import type { ProviderConfig } from "../../lib/providers/types";
-import { useChatStore, selectMessages } from "../../store/chatStore";
+import { useChatStore, selectMessages, selectActiveThreadId } from "../../store/chatStore";
+import { useLessonsStore } from "../../store/lessonsStore";
 import { LessonPicker } from "../ai/LessonPicker";
 import { ChatMessage } from "./ChatMessage";
+import { ChatHistoryMenu } from "./ChatHistoryMenu";
 import { ChatStarterPrompts } from "./ChatStarterPrompts";
 import { ChatInput } from "./ChatInput";
 
@@ -17,9 +19,21 @@ export function ChatPanel({ lesson, config }: Props) {
   const messages = useChatStore(selectMessages(lesson.id));
   const sendMessage = useChatStore((s) => s.sendMessage);
   const retryLastMessage = useChatStore((s) => s.retryLastMessage);
-  const clearConversation = useChatStore((s) => s.clearConversation);
+  const activeThreadId = useChatStore(selectActiveThreadId(lesson.id));
+  const allThreads = useChatStore((s) => s.threads);
+  const newChat = useChatStore((s) => s.newChat);
+  const openThread = useChatStore((s) => s.openThread);
+  const deleteThread = useChatStore((s) => s.deleteThread);
+  const clearAllHistory = useChatStore((s) => s.clearAllHistory);
+  const lessons = useLessonsStore((s) => s.lessons);
+  const selectLesson = useLessonsStore((s) => s.selectLesson);
+
+  // History shows chats from every lesson. Sorting here (not inside a store selector) keeps selector results stable.
+  const sortedThreads = useMemo(() => [...allThreads].sort((a, b) => b.updatedAt - a.updatedAt), [allThreads]);
+  const lessonTitles = useMemo(() => Object.fromEntries(lessons.map((l) => [l.id, l.title])), [lessons]);
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const floatRef = useRef<HTMLDivElement>(null);
@@ -55,7 +69,13 @@ export function ChatPanel({ lesson, config }: Props) {
   // Close the inline lesson switcher whenever the active lesson actually changes.
   useEffect(() => {
     setSwitcherOpen(false);
+    setHistoryOpen(false);
   }, [lesson.id]);
+
+  // Jump to the newest message whenever a different chat is opened (or a new one started).
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+  }, [activeThreadId]);
 
   // A lesson switch always lands on a clean thread for that lesson (per-lesson
   // threads in the store already guarantee this — nothing extra to reset here).
@@ -89,18 +109,77 @@ export function ChatPanel({ lesson, config }: Props) {
           {messages.length > 0 && (
             <button
               type="button"
-              onClick={() => clearConversation(lesson.id)}
-              title="Start a new conversation"
+              onClick={() => newChat(lesson.id)}
+              title="Start a new chat (this one stays in your history)"
               className="flex items-center gap-1.5 text-xs text-paper/50 hover:text-signal transition-colors px-2 py-1.5"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <SquarePen className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">New chat</span>
             </button>
           )}
           <div className="relative">
             <button
               type="button"
-              onClick={() => setSwitcherOpen((v) => !v)}
+              onClick={() => {
+                setHistoryOpen((v) => !v);
+                setSwitcherOpen(false);
+              }}
+              title="Chat history"
+              aria-haspopup="dialog"
+              aria-expanded={historyOpen}
+              className={
+                "flex items-center gap-1.5 text-xs transition-colors px-2 py-1.5 " +
+                (historyOpen ? "text-signal" : "text-paper/50 hover:text-signal")
+              }
+            >
+              <History className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">History</span>
+              {sortedThreads.length > 0 && (
+                <span className="text-[10px] font-semibold rounded-full bg-ink-3 text-paper/70 px-1.5 leading-4">
+                  {sortedThreads.length}
+                </span>
+              )}
+            </button>
+            {historyOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setHistoryOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 z-20">
+                  <ChatHistoryMenu
+                    threads={sortedThreads}
+                    lessonTitles={lessonTitles}
+                    activeId={activeThreadId}
+                    onNew={() => {
+                      newChat(lesson.id);
+                      setHistoryOpen(false);
+                    }}
+                    onOpen={(id) => {
+                      const thread = allThreads.find((t) => t.id === id);
+                      if (!thread) return;
+                      // Point the chat at the thread first, then switch the app to that chat's lesson,
+                      // so the panel never flashes another chat from the lesson being switched to.
+                      openThread(thread.lessonId, thread.id);
+                      if (thread.lessonId !== lesson.id) selectLesson(thread.lessonId);
+                      setHistoryOpen(false);
+                    }}
+                    onDelete={(id) => deleteThread(id)}
+                    onClearAll={() => {
+                      if (confirm("Delete all saved chats, across every lesson? This can't be undone.")) {
+                        clearAllHistory();
+                        setHistoryOpen(false);
+                      }
+                    }}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setSwitcherOpen((v) => !v);
+                setHistoryOpen(false);
+              }}
               className="flex items-center gap-1 text-xs font-semibold text-signal hover:underline px-2 py-1.5"
             >
               Change
