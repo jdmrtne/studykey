@@ -54,7 +54,7 @@ export function Reviewer() {
           <label className="text-sm font-semibold text-paper/80 mb-2 block">Lesson</label>
           <LessonPicker />
         </div>
-        <Button variant="primary" onClick={handleGenerate} disabled={!lesson || loading} className="self-start">
+        <Button variant="primary" onClick={handleGenerate} disabled={!lesson || loading} className="w-full sm:w-auto sm:self-start">
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}
           Generate Reviewer
         </Button>
@@ -62,7 +62,7 @@ export function Reviewer() {
       </Card>
 
       {reviewer && (
-        <Card className="p-6 flex flex-col gap-6">
+        <Card className="p-5 sm:p-6 flex flex-col gap-6">
           <h2 className="text-xl font-display font-bold">{reviewer.title}</h2>
           {reviewer.sections.map((s, i) => (
             <div key={i} className="flex flex-col gap-2 pb-5 border-b border-ink-3 last:border-0 last:pb-0">

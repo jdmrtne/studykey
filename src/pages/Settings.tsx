@@ -26,7 +26,7 @@ export function Settings() {
         </p>
         <Button
           variant="danger"
-          className="self-start"
+          className="w-full sm:w-auto sm:self-start"
           onClick={() => {
             if (confirm(`Delete all ${lessons.length} saved lessons from this device?`)) {
               lessons.forEach((l) => removeLesson(l.id));

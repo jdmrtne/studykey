@@ -85,7 +85,7 @@ export function Lessons() {
             type="button"
             onClick={() => setMode("upload")}
             className={clsx(
-              "px-4 py-2 rounded-full text-sm font-semibold transition-colors",
+              "px-4 py-2.5 rounded-full text-sm font-semibold transition-colors touch-manipulation",
               mode === "upload" ? "bg-signal text-night" : "text-paper/60 hover:text-paper"
             )}
           >
@@ -95,7 +95,7 @@ export function Lessons() {
             type="button"
             onClick={() => setMode("paste")}
             className={clsx(
-              "px-4 py-2 rounded-full text-sm font-semibold transition-colors",
+              "px-4 py-2.5 rounded-full text-sm font-semibold transition-colors touch-manipulation",
               mode === "paste" ? "bg-signal text-night" : "text-paper/60 hover:text-paper"
             )}
           >
@@ -106,7 +106,7 @@ export function Lessons() {
         {mode === "upload" ? (
           <div className="flex flex-col gap-3">
             <div
-              className="border-2 border-dashed border-ink-3 rounded-2xl p-10 flex flex-col items-center gap-3 text-center cursor-pointer hover:border-signal/60 hover:bg-signal/5 transition-colors"
+              className="border-2 border-dashed border-ink-3 rounded-2xl p-6 sm:p-10 flex flex-col items-center gap-3 text-center cursor-pointer hover:border-signal/60 hover:bg-signal/5 transition-colors touch-manipulation"
               onClick={() => !extracting && fileInputRef.current?.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -166,7 +166,7 @@ export function Lessons() {
               />
               {pasteText.trim() && <p className="text-xs text-paper/40">~{estimateTokens(pasteText)} tokens</p>}
             </div>
-            <Button variant="primary" onClick={handlePasteSubmit} disabled={!pasteText.trim()} className="self-start">
+            <Button variant="primary" onClick={handlePasteSubmit} disabled={!pasteText.trim()} className="w-full sm:w-auto sm:self-start">
               Add Lesson
             </Button>
           </div>
@@ -235,7 +235,7 @@ export function Lessons() {
                 <button
                   type="button"
                   onClick={() => removeLesson(lesson.id)}
-                  className="text-paper/30 hover:text-danger transition-colors p-2"
+                  className="text-paper/30 hover:text-danger transition-colors p-2 tap-target flex items-center justify-center touch-manipulation"
                   aria-label={`Remove ${lesson.title}`}
                   title="Remove lesson"
                 >

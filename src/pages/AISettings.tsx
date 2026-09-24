@@ -96,10 +96,14 @@ export function AISettings() {
             setConn({ status: "idle" });
           }}
           placeholder={config.provider === "anthropic" ? "sk-ant-..." : "your API key"}
+          autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
         />
         <button
           type="button"
-          className="text-xs text-paper/50 hover:text-paper -mt-3 self-start flex items-center gap-1"
+          className="text-xs text-paper/50 hover:text-paper -mt-2 self-start flex items-center gap-1.5 py-2 px-1 -mx-1 touch-manipulation"
           onClick={() => setShowKey((v) => !v)}
         >
           {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -112,6 +116,11 @@ export function AISettings() {
             value={config.baseUrl ?? ""}
             onChange={(e) => setBaseUrl(e.target.value)}
             placeholder="https://example.com/v1"
+            autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="url"
           />
         )}
 
@@ -130,10 +139,11 @@ export function AISettings() {
         </div>
 
         {adapter.capabilities.supportsTemperature && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <TextField
               label="Temperature"
               type="number"
+              inputMode="decimal"
               min={0}
               max={2}
               step={0.1}
@@ -143,6 +153,7 @@ export function AISettings() {
             <TextField
               label="Max Output Tokens"
               type="number"
+              inputMode="numeric"
               min={256}
               step={256}
               value={config.maxOutputTokens}
@@ -151,8 +162,8 @@ export function AISettings() {
           </div>
         )}
 
-        <label className="flex items-center gap-2 text-sm text-paper/70">
-          <input type="checkbox" checked={rememberKey} onChange={(e) => setRememberKey(e.target.checked)} className="accent-signal w-4 h-4" />
+        <label className="flex items-center gap-2.5 text-sm text-paper/70 py-1">
+          <input type="checkbox" checked={rememberKey} onChange={(e) => setRememberKey(e.target.checked)} className="accent-signal w-5 h-5 flex-shrink-0" />
           Remember API key on this device
         </label>
         {rememberKey && (
@@ -161,15 +172,15 @@ export function AISettings() {
           </p>
         )}
 
-        <div className="flex flex-wrap gap-3 pt-2">
-          <Button variant="ghost" onClick={handleTest} disabled={conn.status === "testing"}>
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 pt-2">
+          <Button variant="primary" onClick={handleSave} className="w-full sm:w-auto">
+            Save Settings
+          </Button>
+          <Button variant="ghost" onClick={handleTest} disabled={conn.status === "testing"} className="w-full sm:w-auto">
             {conn.status === "testing" ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}
             Test Connection
           </Button>
-          <Button variant="primary" onClick={handleSave}>
-            Save Settings
-          </Button>
-          <Button variant="danger" onClick={removeApiKey}>
+          <Button variant="danger" onClick={removeApiKey} className="w-full sm:w-auto">
             Clear API Key
           </Button>
         </div>
@@ -197,8 +208,8 @@ export function AISettings() {
       </Card>
 
       <Card className="p-5">
-        <label className="flex items-center gap-2 text-sm font-semibold">
-          <input type="checkbox" checked={devMode} onChange={(e) => setDevMode(e.target.checked)} className="accent-signal w-4 h-4" />
+        <label className="flex items-center gap-2.5 text-sm font-semibold py-1">
+          <input type="checkbox" checked={devMode} onChange={(e) => setDevMode(e.target.checked)} className="accent-signal w-5 h-5 flex-shrink-0" />
           Developer mode
         </label>
         {devMode && (
@@ -210,7 +221,7 @@ export function AISettings() {
 
       <button
         type="button"
-        className="text-xs text-danger/80 hover:text-danger self-start"
+        className="text-xs text-danger/80 hover:text-danger self-start py-2 px-1 -mx-1 touch-manipulation"
         onClick={() => {
           if (confirm("Clear all saved AI configuration? This removes your key and settings from this device.")) {
             clearAll();

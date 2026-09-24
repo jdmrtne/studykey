@@ -12,6 +12,8 @@ import {
   BookMarked,
   Menu,
   X,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import clsx from "clsx";
 import { ThemeToggle } from "../ui/ThemeToggle";
@@ -49,17 +51,36 @@ const MOBILE_MORE_PATHS = new Set(MOBILE_MORE_ITEMS.map((i) => i.to));
 /** Study tools that need a selected lesson — shown dimmed (not hidden) when none is selected, so the nav stays stable. */
 const LESSON_SCOPED_PATHS = new Set(["/reviewer", "/quiz", "/flashcards", "/chat"]);
 
+const SIDEBAR_COLLAPSED_KEY = "studykey-sidebar-collapsed";
+
+function loadSidebarCollapsed(): boolean {
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function AppShell() {
   const isConfigured = useAISettingsStore(selectIsConfigured);
   const lessons = useLessonsStore((s) => s.lessons);
   const selectedLesson = useLessonsStore(selectSelectedLesson);
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(loadSidebarCollapsed);
 
   // Close the "More" sheet whenever navigation actually happens.
   useEffect(() => {
     setMoreOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_COLLAPSED_KEY, collapsed ? "1" : "0");
+    } catch {
+      // localStorage unavailable (privacy mode, etc.) — collapse state just won't persist.
+    }
+  }, [collapsed]);
 
   const moreActive = MOBILE_MORE_PATHS.has(location.pathname);
 
@@ -90,12 +111,33 @@ export function AppShell() {
       </header>
 
       {/* ---------- Desktop sidebar (hidden on mobile) ---------- */}
-      <aside className="hidden md:flex md:w-60 md:min-h-screen md:flex-col border-r border-ink-3 bg-ink-2/60 backdrop-blur-sm">
-        <div className="px-5 py-4 flex items-center gap-2 border-b border-ink-3">
-          <span className="w-8 h-8 rounded-xl bg-signal text-night flex items-center justify-center font-display font-bold">
-            SK
-          </span>
-          <span className="font-display font-semibold text-lg">StudyKey</span>
+      <aside
+        className={clsx(
+          "hidden md:flex md:min-h-screen md:flex-col border-r border-ink-3 bg-ink-2/60 backdrop-blur-sm transition-[width] duration-200 flex-shrink-0 relative",
+          collapsed ? "md:w-[4.5rem]" : "md:w-60"
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          className="hidden md:flex absolute top-5 -right-3 w-6 h-6 rounded-full border border-ink-3 bg-ink-2 items-center justify-center text-paper/50 hover:text-paper hover:border-signal/50 transition-colors z-10"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <PanelLeftOpen className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-3.5 h-3.5" />}
+        </button>
+        <div
+          className={clsx(
+            "flex items-center border-b border-ink-3 h-[3.75rem] flex-shrink-0",
+            collapsed ? "justify-center px-2" : "px-4"
+          )}
+        >
+          <Link to="/" className={clsx("flex items-center gap-2 min-w-0", collapsed && "justify-center")}>
+            <span className="w-8 h-8 rounded-xl bg-signal text-night flex items-center justify-center font-display font-bold flex-shrink-0">
+              SK
+            </span>
+            {!collapsed && <span className="font-display font-semibold text-lg truncate">StudyKey</span>}
+          </Link>
         </div>
         <nav className="flex flex-col flex-1 px-2 py-3 gap-1">
           {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => {
@@ -105,56 +147,72 @@ export function AppShell() {
                 key={to}
                 to={to}
                 end={end}
+                title={collapsed ? label : undefined}
+                aria-label={collapsed ? label : undefined}
                 className={({ isActive }) =>
                   clsx(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors",
+                    "flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-colors relative",
+                    collapsed ? "justify-center px-0" : "px-3",
                     isActive ? "bg-signal/15 text-signal" : "text-paper/70 hover:bg-ink-3/60 hover:text-paper",
                     dimmed && !isActive && "text-paper/35"
                   )
                 }
               >
                 <Icon className="w-4 h-4 flex-shrink-0" />
-                <span>{label}</span>
-                {to === "/ai-settings" && !isConfigured && (
-                  <span className="ml-auto w-2 h-2 rounded-full bg-amber" title="AI provider not configured" />
+                {!collapsed && <span>{label}</span>}
+                {!isConfigured && to === "/ai-settings" && (
+                  <span
+                    className={clsx(
+                      "w-2 h-2 rounded-full bg-amber",
+                      collapsed ? "absolute top-1.5 right-1.5" : "ml-auto"
+                    )}
+                    title="AI provider not configured"
+                  />
                 )}
               </NavLink>
             );
           })}
         </nav>
-        <div className="flex px-4 py-4 border-t border-ink-3 items-center justify-between">
-          <span className="text-xs text-paper/40">BYOK — your key, your data</span>
+        <div
+          className={clsx(
+            "flex py-4 border-t border-ink-3 items-center",
+            collapsed ? "flex-col gap-3 px-2" : "justify-between px-4"
+          )}
+        >
+          {!collapsed && <span className="text-xs text-paper/40">BYOK — your key, your data</span>}
           <ThemeToggle />
         </div>
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Active-lesson bar — visible on every page so it's always obvious what's currently being studied. */}
-        <div className="border-b border-ink-3 bg-ink-2/40 px-4 md:px-8 py-2.5 flex items-center gap-2 md:gap-3">
-          <BookMarked className="w-4 h-4 text-paper/40 flex-shrink-0" />
-          {lessons.length === 0 ? (
-            <p className="text-xs text-paper/40 truncate">
-              No lesson yet —{" "}
-              <Link to="/lessons" className="text-signal hover:underline font-semibold">
-                add one
-              </Link>{" "}
-              to get started.
-            </p>
-          ) : (
-            <>
-              <span className="text-xs text-paper/40 flex-shrink-0 hidden sm:inline">Studying:</span>
-              <span className="text-xs font-semibold text-paper/90 truncate min-w-0">
-                {selectedLesson ? selectedLesson.title : "No lesson selected"}
-              </span>
-              <div className="ml-auto flex-shrink-0">
-                <LessonPicker compact />
-              </div>
-            </>
-          )}
+        <div className="border-b border-ink-3 bg-ink-2/40 px-4 md:px-8 py-2.5">
+          <div className="flex items-center gap-2 md:gap-3 max-w-5xl mx-auto">
+            <BookMarked className="w-4 h-4 text-paper/40 flex-shrink-0" />
+            {lessons.length === 0 ? (
+              <p className="text-xs text-paper/40 truncate">
+                No lesson yet —{" "}
+                <Link to="/lessons" className="text-signal hover:underline font-semibold">
+                  add one
+                </Link>{" "}
+                to get started.
+              </p>
+            ) : (
+              <>
+                <span className="text-xs text-paper/40 flex-shrink-0 hidden sm:inline">Studying:</span>
+                <span className="text-xs font-semibold text-paper/90 truncate min-w-0">
+                  {selectedLesson ? selectedLesson.title : "No lesson selected"}
+                </span>
+                <div className="ml-auto flex-shrink-0">
+                  <LessonPicker compact />
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <main
-          className="flex-1 min-w-0 px-4 md:px-8 py-5 md:py-8 max-w-5xl w-full"
+          className="flex-1 min-w-0 px-4 md:px-8 py-5 md:py-8 max-w-5xl w-full mx-auto"
           style={{ paddingBottom: "calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px) + 1.25rem)" }}
         >
           <Outlet />

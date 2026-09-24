@@ -97,7 +97,7 @@ export function Quiz() {
           <MultiSelectPills options={ALL_TYPES} value={types} onChange={setTypes} labels={TYPE_LABELS} />
         </div>
 
-        <Button variant="primary" onClick={handleGenerate} disabled={!lesson || types.length === 0 || loading} className="self-start">
+        <Button variant="primary" onClick={handleGenerate} disabled={!lesson || types.length === 0 || loading} className="w-full sm:w-auto sm:self-start">
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}
           Generate Quiz
         </Button>
@@ -126,7 +126,7 @@ export function Quiz() {
                           type="button"
                           onClick={() => setAnswers((a) => ({ ...a, [q.id]: opt }))}
                           className={clsx(
-                            "text-left px-4 py-2.5 rounded-xl border-2 text-sm transition-colors",
+                            "text-left px-4 py-2.5 rounded-xl border-2 text-sm transition-colors touch-manipulation",
                             chosen ? "border-signal bg-signal/10" : "border-ink-3 hover:border-signal/40"
                           )}
                         >
@@ -145,7 +145,7 @@ export function Quiz() {
                         type="button"
                         onClick={() => setAnswers((a) => ({ ...a, [q.id]: opt }))}
                         className={clsx(
-                          "px-4 py-2.5 rounded-xl border-2 text-sm font-semibold transition-colors",
+                          "flex-1 px-4 py-2.5 rounded-xl border-2 text-sm font-semibold transition-colors touch-manipulation",
                           picked === opt ? "border-signal bg-signal/10" : "border-ink-3 hover:border-signal/40"
                         )}
                       >
@@ -177,9 +177,9 @@ export function Quiz() {
                 <button
                   type="button"
                   onClick={() => setRevealedSource(revealedSource === q.id ? null : q.id)}
-                  className="text-xs text-paper/40 hover:text-signal flex items-center gap-1 self-start"
+                  className="text-xs text-paper/40 hover:text-signal flex items-center gap-1 self-start py-2 px-1 -mx-1 touch-manipulation"
                 >
-                  <Eye className="w-3 h-3" /> View source
+                  <Eye className="w-3.5 h-3.5" /> View source
                 </button>
                 {revealedSource === q.id && lesson && (
                   <div className="rounded-xl bg-ink p-3 text-xs text-paper/60">

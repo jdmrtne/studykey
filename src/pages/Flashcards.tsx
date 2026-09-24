@@ -67,7 +67,7 @@ export function Flashcards() {
           <label className="text-sm font-semibold text-paper/80 mb-2 block">Number of cards</label>
           <SelectPills options={[10, 15, 20, 30]} value={count} onChange={setCount} />
         </div>
-        <Button variant="primary" onClick={handleGenerate} disabled={!lesson || loading} className="self-start">
+        <Button variant="primary" onClick={handleGenerate} disabled={!lesson || loading} className="w-full sm:w-auto sm:self-start">
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : null}
           Generate Flashcards
         </Button>
@@ -82,33 +82,39 @@ export function Flashcards() {
           <button
             type="button"
             onClick={() => setFlipped((f) => !f)}
-            className="w-full max-w-md aspect-[3/2] rounded-[1.25rem] border-2 border-ink-3 bg-ink-2 flex items-center justify-center p-8 text-center relative"
+            aria-label={flipped ? "Showing answer. Tap to show question." : "Showing question. Tap to show answer."}
+            className="w-full max-w-md aspect-[3/2] rounded-[1.25rem] border-2 border-ink-3 bg-ink-2 flex items-center justify-center p-6 sm:p-8 text-center relative touch-manipulation"
           >
             <span className={clsx("font-display font-semibold text-lg", flipped && "text-paper/90")}>
               {flipped ? current.back : current.front}
             </span>
             <RotateCw className="w-4 h-4 absolute bottom-3 right-3 text-paper/30" />
           </button>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3 w-full max-w-md justify-center">
             <Button
               variant="ghost"
+              aria-label="Previous card"
               onClick={() => {
                 setIndex((i) => Math.max(0, i - 1));
                 setFlipped(false);
               }}
               disabled={index === 0}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
             </Button>
+            <span className="text-xs text-paper/40 tabular-nums px-2">
+              {index + 1} / {cards!.length}
+            </span>
             <Button
               variant="ghost"
+              aria-label="Next card"
               onClick={() => {
                 setIndex((i) => Math.min(cards!.length - 1, i + 1));
                 setFlipped(false);
               }}
               disabled={index === cards!.length - 1}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
         </div>
