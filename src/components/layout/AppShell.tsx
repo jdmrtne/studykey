@@ -238,10 +238,12 @@ export function AppShell() {
 
         <main
           className={clsx(
-            "flex-1 min-w-0 px-4 md:px-8 max-w-5xl w-full mx-auto",
+            "flex-1 min-w-0 w-full",
+            // Chat: full-width so its scrollbar sits at the far right edge of the window, like any other site.
+            // The chat panel centers its own content (see ChatPanel) instead of main doing it.
             locked
-              ? "min-h-0 overflow-hidden flex flex-col pt-3 md:pt-4 pb-[calc(var(--mobile-nav-h)+env(safe-area-inset-bottom,0px)+0.5rem)] md:pb-4"
-              : "py-5 md:py-8"
+              ? "min-h-0 overflow-hidden flex flex-col pb-[calc(var(--mobile-nav-h)+env(safe-area-inset-bottom,0px))] md:pb-0"
+              : "px-4 md:px-8 py-5 md:py-8 max-w-5xl mx-auto"
           )}
           style={
             locked

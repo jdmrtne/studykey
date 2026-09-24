@@ -48,7 +48,8 @@ export function ChatPanel({ lesson, config }: Props) {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Lesson header — always visible so the student is never unsure which lesson is being discussed. */}
-      <div className="flex items-center justify-between gap-3 px-1 py-3 border-b border-ink-3 flex-shrink-0">
+      <div className="border-b border-ink-3 flex-shrink-0">
+      <div className="flex items-center justify-between gap-3 px-4 md:px-8 py-3 max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2 min-w-0">
           <span className="w-8 h-8 rounded-lg bg-signal/15 text-signal flex items-center justify-center flex-shrink-0">
             <MessageCircleQuestion className="w-4 h-4" />
@@ -93,9 +94,12 @@ export function ChatPanel({ lesson, config }: Props) {
           </div>
         </div>
       </div>
+      </div>
 
-      {/* Message list */}
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hidden px-1 py-5 flex flex-col gap-4">
+      {/* Message list — spans the full width so its scrollbar sits at the window's right edge;
+          the messages themselves stay centered in a readable column. */}
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
+        <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-5 flex flex-col gap-4 min-h-full">
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8">
             <div className="text-center">
@@ -116,11 +120,14 @@ export function ChatPanel({ lesson, config }: Props) {
             />
           ))
         )}
+        </div>
       </div>
 
       {/* Input */}
-      <div className="border-t border-ink-3 px-1 py-4 flex-shrink-0">
-        <ChatInput onSend={handleSend} disabled={isBusy} />
+      <div className="border-t border-ink-3 py-4 flex-shrink-0">
+        <div className="max-w-5xl mx-auto w-full px-4 md:px-8">
+          <ChatInput onSend={handleSend} disabled={isBusy} />
+        </div>
       </div>
     </div>
   );
