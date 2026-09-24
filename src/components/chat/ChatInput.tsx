@@ -49,7 +49,7 @@ export function ChatInput({ onSend, disabled }: Props) {
             type="button"
             disabled={disabled}
             onClick={() => submit(action.buildPrompt(draft))}
-            className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border border-ink-3 text-paper/60 hover:border-signal/50 hover:text-paper transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
+            className="flex-shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold border border-ink-3 bg-ink-2 shadow-sm text-paper/60 hover:border-signal/50 hover:text-paper transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
           >
             {action.label}
           </button>
@@ -65,7 +65,7 @@ export function ChatInput({ onSend, disabled }: Props) {
           disabled={disabled}
           rows={1}
           placeholder="Ask something about this lesson..."
-          className="flex-1 resize-none max-h-40 rounded-2xl border-2 border-ink-3 bg-ink px-4 py-3 text-sm text-paper placeholder:text-paper/30 outline-none focus:border-signal transition-colors disabled:opacity-60"
+          className="flex-1 resize-none max-h-40 rounded-2xl shadow-lg border-2 border-ink-3 bg-ink px-4 py-3 text-sm text-paper placeholder:text-paper/30 outline-none focus:border-signal transition-colors disabled:opacity-60"
           onInput={(e) => {
             const el = e.currentTarget;
             el.style.height = "auto";

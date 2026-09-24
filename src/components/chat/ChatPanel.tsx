@@ -21,6 +21,12 @@ export function ChatPanel({ lesson, config }: Props) {
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const floatRef = useRef<HTMLDivElement>(null);
+  // Height of the floating input area (so the last message can scroll clear of it) and the width of the
+  // message list's scrollbar (so the floating area stops short of it and never covers it).
+  const [floatH, setFloatH] = useState(160);
+  const [scrollbarW, setScrollbarW] = useState(0);
 
   const isBusy = messages.some((m) => m.pending);
   const hasFailedLast = messages.length > 0 && messages[messages.length - 1].error !== undefined;
@@ -28,6 +34,23 @@ export function ChatPanel({ lesson, config }: Props) {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length, messages[messages.length - 1]?.content]);
+
+  useEffect(() => {
+    const floating = floatRef.current;
+    const scroller = scrollRef.current;
+    const content = contentRef.current;
+    if (!floating || !scroller || !content) return;
+    const measure = () => {
+      setFloatH(floating.offsetHeight);
+      setScrollbarW(scroller.offsetWidth - scroller.clientWidth);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(floating);
+    ro.observe(scroller);
+    ro.observe(content);
+    return () => ro.disconnect();
+  }, []);
 
   // Close the inline lesson switcher whenever the active lesson actually changes.
   useEffect(() => {
@@ -48,7 +71,7 @@ export function ChatPanel({ lesson, config }: Props) {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Lesson header — always visible so the student is never unsure which lesson is being discussed. */}
-      <div className="border-b border-ink-3 flex-shrink-0">
+      <div className="flex-shrink-0">
       <div className="flex items-center justify-between gap-3 px-4 md:px-8 py-3 max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2 min-w-0">
           <span className="w-8 h-8 rounded-lg bg-signal/15 text-signal flex items-center justify-center flex-shrink-0">
@@ -98,8 +121,13 @@ export function ChatPanel({ lesson, config }: Props) {
 
       {/* Message list — spans the full width so its scrollbar sits at the window's right edge;
           the messages themselves stay centered in a readable column. */}
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-        <div className="max-w-5xl mx-auto w-full px-4 md:px-8 py-5 flex flex-col gap-4 min-h-full">
+      <div className="relative flex-1 min-h-0">
+      <div ref={scrollRef} className="absolute inset-0 overflow-y-auto overscroll-contain">
+        <div
+          ref={contentRef}
+          className="max-w-5xl mx-auto w-full px-4 md:px-8 pt-5 flex flex-col gap-4 min-h-full"
+          style={{ paddingBottom: floatH + 16 }}
+        >
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8">
             <div className="text-center">
@@ -123,11 +151,20 @@ export function ChatPanel({ lesson, config }: Props) {
         </div>
       </div>
 
-      {/* Input */}
-      <div className="border-t border-ink-3 py-4 flex-shrink-0">
-        <div className="max-w-5xl mx-auto w-full px-4 md:px-8">
+      {/* Floating input + quick actions: no divider line, they sit over the bottom of the message list and
+          fade into the page. The wrapper ignores pointer events so the list stays scrollable around it. */}
+      <div
+        ref={floatRef}
+        className="absolute bottom-0 left-0 pointer-events-none pt-10 pb-4"
+        style={{ right: scrollbarW, background: "linear-gradient(to top, var(--color-ink) 55%, transparent)" }}
+      >
+        <div
+          className="pointer-events-auto max-w-5xl mx-auto w-full px-4 md:px-8"
+          onWheel={(e) => scrollRef.current?.scrollBy({ top: e.deltaY })}
+        >
           <ChatInput onSend={handleSend} disabled={isBusy} />
         </div>
+      </div>
       </div>
     </div>
   );
