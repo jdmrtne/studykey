@@ -95,7 +95,7 @@ export function ChatPanel({ lesson, config }: Props) {
       </div>
 
       {/* Message list */}
-      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-1 py-5 flex flex-col gap-4">
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-hidden px-1 py-5 flex flex-col gap-4">
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8">
             <div className="text-center">
