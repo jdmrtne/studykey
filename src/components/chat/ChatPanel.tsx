@@ -46,11 +46,9 @@ export function ChatPanel({ lesson, config }: Props) {
   }
 
   return (
-    <div
-      className="flex flex-col h-[calc(100dvh-var(--mobile-header-h)-var(--mobile-nav-h)-2.6rem-1.25rem-env(safe-area-inset-bottom,0px))] md:h-[calc(100vh-7rem)] md:max-h-[46rem] rounded-[1.25rem] border border-ink-3 bg-ink-2/80 backdrop-blur-sm shadow-xl shadow-black/20 overflow-hidden"
-    >
+    <div className="flex flex-col h-[calc(100dvh-var(--mobile-header-h)-var(--mobile-nav-h)-2.6rem-1.25rem-env(safe-area-inset-bottom,0px))] md:h-[calc(100vh-7rem)] md:max-h-[46rem]">
       {/* Lesson header — always visible so the student is never unsure which lesson is being discussed. */}
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-ink-3 bg-ink-2">
+      <div className="flex items-center justify-between gap-3 px-1 py-3 border-b border-ink-3 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <span className="w-8 h-8 rounded-lg bg-signal/15 text-signal flex items-center justify-center flex-shrink-0">
             <MessageCircleQuestion className="w-4 h-4" />
@@ -97,7 +95,7 @@ export function ChatPanel({ lesson, config }: Props) {
       </div>
 
       {/* Message list */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-5 py-5 flex flex-col gap-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-1 py-5 flex flex-col gap-4">
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8">
             <div className="text-center">
@@ -121,7 +119,7 @@ export function ChatPanel({ lesson, config }: Props) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-ink-3 bg-ink-2 px-4 sm:px-5 py-4">
+      <div className="border-t border-ink-3 px-1 py-4 flex-shrink-0">
         <ChatInput onSend={handleSend} disabled={isBusy} />
       </div>
     </div>
