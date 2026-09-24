@@ -123,7 +123,10 @@ export function Reviewer() {
     return (
       <div className="flex flex-col gap-6 max-w-3xl w-full mx-auto">
         <div className="relative flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-display font-bold">Reviewer</h1>
+          <div>
+<h1 className="text-2xl font-display font-bold">Reviewer</h1>
+<p className="text-paper/60 text-sm mt-1">Review what matters.</p>
+</div>
           {historyButton}
           {historyMenu}
         </div>
@@ -136,7 +139,10 @@ export function Reviewer() {
   return (
     <div className="flex flex-col gap-6 max-w-3xl w-full mx-auto">
       <div className="relative flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-display font-bold">Reviewer</h1>
+        <div>
+<h1 className="text-2xl font-display font-bold">Reviewer</h1>
+<p className="text-paper/60 text-sm mt-1">Review what matters.</p>
+</div>
         {historyButton}
         {historyMenu}
       </div>

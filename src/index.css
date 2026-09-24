@@ -2,7 +2,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap");
 
 /*
-  STUDYKEY — design tokens
+  MEMORA — design tokens
   Adapted from the PinoyQuiz palette/component kit, restyled for a calmer
   study/productivity tool rather than a game show. Same token *shape*
   (ink/accent/dim pairs, always-fixed night/cloud text-on-fill colors) so
@@ -28,6 +28,7 @@
   --color-paper: #f4f5f9;
   --color-mint: #2fd39a;
   --color-danger: #ff6b6b;
+  --color-gold: #fbbf24; /* the Memora sparkle — accent for highlights, not body text */
 
   /* Fixed, non-themed tokens — text stamped on a saturated accent fill
      must stay put even when the surface theme flips. See PinoyQuiz's
@@ -64,9 +65,23 @@
   --color-amber: #b5760f;
   --color-mint: #0e8e68;
   --color-danger: #c94040;
+  --color-gold: #b7791f;
 
   --glow-1: rgba(139, 109, 240, 0.08);
   --glow-2: rgba(34, 85, 214, 0.1);
+}
+
+/* Memora brand tokens — semantic aliases over the palette above, so themes flip in one place. */
+:root {
+  --memora-primary: var(--color-signal);
+  --memora-primary-hover: var(--color-signal-dim);
+  --memora-secondary: var(--color-violet);
+  --memora-accent: var(--color-gold);
+  --memora-background: var(--color-ink);
+  --memora-surface: var(--color-ink-2);
+  --memora-text: var(--color-paper);
+  --memora-muted: color-mix(in srgb, var(--color-paper) 60%, transparent);
+  --memora-border: var(--color-ink-3);
 }
 
 @layer base {

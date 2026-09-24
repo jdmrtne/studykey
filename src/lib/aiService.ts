@@ -39,6 +39,12 @@ export async function generate(config: ProviderConfig, req: GenerateRequest): Pr
   if (!config.apiKey) {
     throw new AIServiceError("invalid_api_key", "No API key configured. Connect an AI provider in AI Settings.");
   }
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    throw new AIServiceError(
+      "network_error",
+      "You're offline. AI generation needs an internet connection — your saved study materials are still available."
+    );
+  }
   const adapter = getAdapter(config.provider);
   return adapter.generate(config, req);
 }

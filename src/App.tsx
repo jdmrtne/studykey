@@ -9,6 +9,7 @@ import { Reviewer } from "./pages/Reviewer";
 import { Chat } from "./pages/Chat";
 import { AISettings } from "./pages/AISettings";
 import { Settings } from "./pages/Settings";
+import { PWAUpdatePrompt } from "./components/pwa/PWAUpdatePrompt";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <PWAUpdatePrompt />
     </ThemeProvider>
   );
 }

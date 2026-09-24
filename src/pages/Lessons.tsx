@@ -74,7 +74,7 @@ export function Lessons() {
       <div>
         <h1 className="text-2xl font-display font-bold">Lessons</h1>
         <p className="text-paper/60 text-sm mt-1">
-          Add a lesson to start. Long lessons are automatically split into chunks so generation and Chat stay
+          Turn your lesson into a study experience. Long lessons are automatically split into chunks so generation and Chat stay
           within your model's context window.
         </p>
       </div>

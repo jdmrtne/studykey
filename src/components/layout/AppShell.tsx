@@ -18,6 +18,9 @@ import {
 import clsx from "clsx";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import { LessonPicker } from "../ai/LessonPicker";
+import { BrandMark } from "../brand/BrandMark";
+import { OfflineBanner } from "../pwa/OfflineBanner";
+import { InstallMemoraButton } from "../pwa/InstallMemoraButton";
 import { useAISettingsStore, selectIsConfigured } from "../../store/aiSettingsStore";
 import { useLessonsStore, selectSelectedLesson } from "../../store/lessonsStore";
 
@@ -27,7 +30,7 @@ const NAV_ITEMS = [
   { to: "/reviewer", label: "Reviewer", icon: Sparkles },
   { to: "/quiz", label: "Quiz", icon: ListChecks },
   { to: "/flashcards", label: "Flashcards", icon: Layers },
-  { to: "/chat", label: "Chat", icon: MessageCircleQuestion },
+  { to: "/chat", label: "AI Chat", icon: MessageCircleQuestion },
   { to: "/ai-settings", label: "AI Settings", icon: KeyRound },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];
@@ -53,7 +56,7 @@ const LESSON_SCOPED_PATHS = new Set(["/reviewer", "/quiz", "/flashcards", "/chat
 
 /** Pages whose title lives in the top bar instead of taking up space inside the page body. */
 const HEADER_TITLES: Record<string, { title: string; subtitle: string }> = {
-  "/chat": { title: "Chat", subtitle: "Ask questions about your lesson — answers stay grounded in it." },
+  "/chat": { title: "Ask Memora", subtitle: "Ask questions about your lesson — answers stay grounded in it." },
 };
 
 const SIDEBAR_COLLAPSED_KEY = "studykey-sidebar-collapsed";
@@ -101,10 +104,8 @@ export function AppShell() {
         style={{ height: "var(--mobile-header-h)", paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         <Link to="/" className="flex items-center gap-2 min-w-0">
-          <span className="w-7 h-7 rounded-lg bg-signal text-night flex items-center justify-center font-display font-bold text-sm flex-shrink-0">
-            SK
-          </span>
-          <span className="font-display font-semibold truncate">StudyKey</span>
+          <BrandMark size={28} />
+          <span className="font-display font-semibold truncate">Memora</span>
         </Link>
         <div className="ml-auto flex items-center gap-1 flex-shrink-0">
           {!isConfigured && (
@@ -135,10 +136,8 @@ export function AppShell() {
           style={{ height: "var(--topbar-h)" }}
         >
           <Link to="/" className={clsx("flex items-center gap-2 min-w-0", collapsed && "justify-center")}>
-            <span className="w-8 h-8 rounded-xl bg-signal text-night flex items-center justify-center font-display font-bold flex-shrink-0">
-              SK
-            </span>
-            {!collapsed && <span className="font-display font-semibold text-lg truncate">StudyKey</span>}
+            <BrandMark size={32} />
+            {!collapsed && <span className="font-display font-semibold text-lg truncate">Memora</span>}
           </Link>
         </div>
         <nav className="flex flex-col flex-1 px-2 py-3 gap-1">
@@ -175,7 +174,8 @@ export function AppShell() {
             );
           })}
         </nav>
-        <div className={clsx("border-t border-ink-3 flex-shrink-0", collapsed ? "px-2 py-2" : "px-2 py-2")}>
+        <div className="border-t border-ink-3 flex-shrink-0 px-2 py-2 flex flex-col gap-1">
+          {!collapsed && <InstallMemoraButton variant="compact" className="px-1 pb-1" />}
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
@@ -197,6 +197,7 @@ export function AppShell() {
       </aside>
 
       <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+        <OfflineBanner />
         {/* Active-lesson bar — visible on every page so it's always obvious what's currently being studied.
             On desktop its height matches the sidebar's logo row (--topbar-h) so the two align. */}
         <div className="border-b border-ink-3 bg-ink-2/40 px-4 md:px-8 py-2.5 md:py-0 flex items-center flex-shrink-0">

@@ -90,7 +90,10 @@ export function Flashcards() {
 
   const header = (
     <div className="relative flex items-center justify-between gap-3">
-      <h1 className="text-2xl font-display font-bold">Flashcards</h1>
+      <div>
+<h1 className="text-2xl font-display font-bold">Flashcards</h1>
+<p className="text-paper/60 text-sm mt-1">Strengthen your memory.</p>
+</div>
       <button
         type="button"
         onClick={() => setHistoryOpen((v) => !v)}

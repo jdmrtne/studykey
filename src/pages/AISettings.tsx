@@ -71,8 +71,8 @@ export function AISettings() {
       <div>
         <h1 className="text-2xl font-display font-bold">AI Settings</h1>
         <p className="text-paper/60 text-sm mt-1">
-          StudyKey is BYOK (Bring Your Own Key) — your API key is used to call your chosen AI provider directly and
-          is never sent to any StudyKey server.
+          Memora is BYOK (Bring Your Own Key) — your API key is used to call your chosen AI provider directly and
+          is never sent to any Memora server.
         </p>
       </div>
 
@@ -219,7 +219,7 @@ export function AISettings() {
           <p className="font-semibold text-paper/70 mb-1">BYOK</p>
           <p>
             This application uses your own AI API key. API usage and costs are billed directly by your selected AI
-            provider. StudyKey does not provide AI credits and does not sell or share your key.
+            provider. Memora does not provide AI credits and does not sell or share your key.
           </p>
         </div>
 

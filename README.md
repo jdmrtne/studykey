@@ -1,8 +1,8 @@
-# StudyKey — BYOK AI Study Builder
+# Memora — AI Study Companion
 
 Upload or paste a lesson, then generate reviewers, quizzes, and flashcards
 using **your own** AI provider API key. No AI credits are provided by this
-app and no key is ever sent to a StudyKey server — it's client-side only,
+app and no key is ever sent to a Memora server — it's client-side only,
 and everything talks directly from your browser to the provider you pick.
 
 ## Stack
@@ -72,4 +72,4 @@ src/
 
 Lesson text and prompts are sent directly to whichever provider you
 configure, only when you click Generate. Nothing is uploaded to a
-StudyKey server — there isn't one.
+Memora server — there isn't one.

@@ -44,9 +44,9 @@ export function Dashboard() {
   return (
     <div className="flex flex-col gap-5 md:gap-6">
       <div>
-        <h1 className="text-2xl font-display font-bold">Dashboard</h1>
+        <h1 className="text-2xl font-display font-bold">Welcome to Memora</h1>
         <p className="text-paper/60 text-sm mt-1">
-          Upload a lesson, generate study tools from it, then ask questions whenever you're confused.
+          Learn smarter. Remember more.
         </p>
       </div>
 
@@ -60,7 +60,7 @@ export function Dashboard() {
           <div>
             <h2 className="text-xl font-display font-bold">Turn any lesson into a study kit</h2>
             <p className="text-sm text-paper/60 mt-2 max-w-md">
-              Add a lesson — a file or pasted text — and StudyKey can generate a reviewer, quiz, and flashcards
+              Add a lesson — a file or pasted text — and Memora can generate a reviewer, quiz, and flashcards
               from it, or you can just ask it questions directly in Chat.
             </p>
           </div>

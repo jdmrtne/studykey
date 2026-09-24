@@ -62,7 +62,10 @@ export function Quiz() {
   if (!isConfigured) {
     return (
       <div className="flex flex-col gap-6">
-        <h1 className="text-2xl font-display font-bold">Quiz</h1>
+        <div>
+<h1 className="text-2xl font-display font-bold">Quiz</h1>
+<p className="text-paper/60 text-sm mt-1">Test what you remember.</p>
+</div>
         <NotConfiguredBanner />
       </div>
     );
@@ -70,7 +73,10 @@ export function Quiz() {
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl w-full mx-auto">
-      <h1 className="text-2xl font-display font-bold">Quiz</h1>
+      <div>
+<h1 className="text-2xl font-display font-bold">Quiz</h1>
+<p className="text-paper/60 text-sm mt-1">Test what you remember.</p>
+</div>
 
       <Card className="p-6 flex flex-col gap-5">
         <div>

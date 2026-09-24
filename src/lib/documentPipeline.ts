@@ -31,13 +31,13 @@ export async function extractText(file: File): Promise<string> {
 
   if (name.endsWith(".doc")) {
     throw new Error(
-      `"${file.name}" is an old .doc file — StudyKey can only read the newer .docx format. ` +
+      `"${file.name}" is an old .doc file — Memora can only read the newer .docx format. ` +
         `Re-save it as .docx in Word (or Google Docs) and re-upload, or paste the text directly.`
     );
   }
 
   throw new Error(
-    `"${file.name}" isn't a supported format. StudyKey reads .txt, .md, .pdf, and .docx files — ` +
+    `"${file.name}" isn't a supported format. Memora reads .txt, .md, .pdf, and .docx files — ` +
       `for anything else, copy/paste the text into the lesson box instead.`
   );
 }

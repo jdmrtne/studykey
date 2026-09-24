@@ -22,7 +22,7 @@ export const openrouterAdapter: ProviderAdapter = {
   async generate(config, req) {
     return callOpenAICompatible(BASE_URL, config, req, {
       "HTTP-Referer": window.location.origin,
-      "X-Title": "StudyKey",
+      "X-Title": "Memora",
     });
   },
   async testConnection(config): Promise<TestConnectionResult> {
@@ -32,7 +32,7 @@ export const openrouterAdapter: ProviderAdapter = {
         BASE_URL,
         config,
         { userPrompt: "Reply with the single word: pong", maxOutputTokens: 8 },
-        { "HTTP-Referer": window.location.origin, "X-Title": "StudyKey" }
+        { "HTTP-Referer": window.location.origin, "X-Title": "Memora" }
       );
       return { ok: true, responseTimeMs: performance.now() - start };
     } catch (err) {
