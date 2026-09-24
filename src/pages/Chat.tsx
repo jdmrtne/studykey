@@ -16,15 +16,10 @@ export function Chat() {
   const showingPanel = isConfigured && lessons.length > 0 && !!lesson;
 
   return (
-    <div className="flex flex-col gap-4 md:gap-6 h-full">
-      {/* On mobile, once the chat panel itself is showing, its own header already
-          says which lesson you're in and the bottom nav says "Chat" — a second
-          page title would just eat space above the fold. */}
-      <div className={showingPanel ? "hidden md:block" : undefined}>
-        <h1 className="text-2xl font-display font-bold">Chat</h1>
-        <p className="text-paper/60 text-sm mt-1">Ask questions about your lesson — answers stay grounded in it.</p>
-      </div>
-
+    // The page title lives in the app's top bar (see AppShell), so the whole area below it belongs to the chat.
+    // The shell is locked to the viewport on this route; only the message list (or, for the
+    // setup states below, this wrapper) scrolls.
+    <div className={showingPanel ? "flex-1 min-h-0 flex flex-col" : "flex-1 min-h-0 overflow-y-auto"}>
       {!isConfigured ? (
         <NotConfiguredBanner />
       ) : lessons.length === 0 ? (

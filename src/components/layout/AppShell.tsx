@@ -51,6 +51,11 @@ const MOBILE_MORE_PATHS = new Set(MOBILE_MORE_ITEMS.map((i) => i.to));
 /** Study tools that need a selected lesson — shown dimmed (not hidden) when none is selected, so the nav stays stable. */
 const LESSON_SCOPED_PATHS = new Set(["/reviewer", "/quiz", "/flashcards", "/chat"]);
 
+/** Pages whose title lives in the top bar instead of taking up space inside the page body. */
+const HEADER_TITLES: Record<string, { title: string; subtitle: string }> = {
+  "/chat": { title: "Chat", subtitle: "Ask questions about your lesson — answers stay grounded in it." },
+};
+
 const SIDEBAR_COLLAPSED_KEY = "studykey-sidebar-collapsed";
 
 function loadSidebarCollapsed(): boolean {
@@ -83,9 +88,13 @@ export function AppShell() {
   }, [collapsed]);
 
   const moreActive = MOBILE_MORE_PATHS.has(location.pathname);
+  const headerTitle = HEADER_TITLES[location.pathname];
+  // Chat is a fixed-viewport screen: the page itself never scrolls, only the message list does,
+  // so the chat header, input and quick actions stay put.
+  const locked = location.pathname === "/chat";
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className={clsx("flex flex-col md:flex-row", locked ? "app-viewport-locked" : "min-h-screen")}>
       {/* ---------- Mobile top bar (md:hidden) ---------- */}
       <header
         className="md:hidden sticky top-0 z-30 flex items-center gap-2 px-4 border-b border-ink-3 bg-ink-2/90 backdrop-blur-sm"
@@ -113,7 +122,8 @@ export function AppShell() {
       {/* ---------- Desktop sidebar (hidden on mobile) ---------- */}
       <aside
         className={clsx(
-          "hidden md:flex md:min-h-screen md:flex-col border-r border-ink-3 bg-ink-2/60 backdrop-blur-sm transition-[width] duration-200 flex-shrink-0",
+          "hidden md:flex md:flex-col border-r border-ink-3 bg-ink-2/60 backdrop-blur-sm transition-[width] duration-200 flex-shrink-0",
+          locked ? "md:min-h-0" : "md:min-h-screen",
           collapsed ? "md:w-[4.5rem]" : "md:w-60"
         )}
       >
@@ -186,11 +196,20 @@ export function AppShell() {
         </div>
       </aside>
 
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col">
         {/* Active-lesson bar — visible on every page so it's always obvious what's currently being studied.
             On desktop its height matches the sidebar's logo row (--topbar-h) so the two align. */}
         <div className="border-b border-ink-3 bg-ink-2/40 px-4 md:px-8 py-2.5 md:py-0 flex items-center flex-shrink-0">
           <div className="flex items-center gap-2 md:gap-3 max-w-5xl mx-auto w-full md:h-[var(--topbar-h)]">
+            {headerTitle ? (
+              <>
+                <h1 className="font-display font-bold text-base md:text-lg flex-shrink-0">{headerTitle.title}</h1>
+                <span className="hidden xl:inline text-xs text-paper/45 truncate min-w-0 max-w-[22rem]">
+                  {headerTitle.subtitle}
+                </span>
+                <span className="w-px h-4 bg-ink-3 flex-shrink-0" aria-hidden="true" />
+              </>
+            ) : null}
             <BookMarked className="w-4 h-4 text-paper/40 flex-shrink-0" />
             {lessons.length === 0 ? (
               <p className="text-xs text-paper/40 truncate">
@@ -218,8 +237,17 @@ export function AppShell() {
         </div>
 
         <main
-          className="flex-1 min-w-0 px-4 md:px-8 py-5 md:py-8 max-w-5xl w-full mx-auto"
-          style={{ paddingBottom: "calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px) + 1.25rem)" }}
+          className={clsx(
+            "flex-1 min-w-0 px-4 md:px-8 max-w-5xl w-full mx-auto",
+            locked
+              ? "min-h-0 overflow-hidden flex flex-col pt-3 md:pt-4 pb-[calc(var(--mobile-nav-h)+env(safe-area-inset-bottom,0px)+0.5rem)] md:pb-4"
+              : "py-5 md:py-8"
+          )}
+          style={
+            locked
+              ? undefined
+              : { paddingBottom: "calc(var(--mobile-nav-h) + env(safe-area-inset-bottom, 0px) + 1.25rem)" }
+          }
         >
           <Outlet />
         </main>

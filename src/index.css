@@ -128,6 +128,13 @@
   .scroll-x-touch::-webkit-scrollbar {
     display: none;
   }
+  /* Fixed-viewport screen (used by Chat): the shell is exactly one viewport tall and never scrolls,
+     so inner panels can own their scrolling. Subtracts the body's safe-area padding. */
+  .app-viewport-locked {
+    height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+  }
   /* Minimum comfortable touch target (Apple/Material guidance is 44px). */
   .tap-target {
     min-height: 2.75rem;
