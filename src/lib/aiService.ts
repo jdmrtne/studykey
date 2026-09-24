@@ -10,6 +10,7 @@ import { AIServiceError } from "./providers/types";
 import { anthropicAdapter } from "./providers/anthropic";
 import { openaiAdapter } from "./providers/openai";
 import { geminiAdapter } from "./providers/gemini";
+import { groqAdapter } from "./providers/groq";
 import { openrouterAdapter } from "./providers/openrouter";
 import { customAdapter } from "./providers/custom";
 
@@ -17,6 +18,7 @@ const adapters: Record<ProviderId, ProviderAdapter> = {
   anthropic: anthropicAdapter,
   openai: openaiAdapter,
   gemini: geminiAdapter,
+  groq: groqAdapter,
   openrouter: openrouterAdapter,
   custom: customAdapter,
 };

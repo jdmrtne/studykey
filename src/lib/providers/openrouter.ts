@@ -15,9 +15,9 @@ export const openrouterAdapter: ProviderAdapter = {
     supportsCustomBaseUrl: false,
   },
   defaultModels: [
-    { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6 (via OpenRouter)" },
-    { id: "openai/gpt-5.1", label: "GPT-5.1 (via OpenRouter)" },
-    { id: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash (via OpenRouter)" },
+    { id: "anthropic/claude-sonnet-5", label: "Claude Sonnet 5 (via OpenRouter)" },
+    { id: "openai/gpt-6-sol", label: "GPT-6 Sol (via OpenRouter)" },
+    { id: "google/gemini-3.8-flash", label: "Gemini 3.8 Flash (via OpenRouter)" },
   ],
   async generate(config, req) {
     return callOpenAICompatible(BASE_URL, config, req, {

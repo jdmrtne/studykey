@@ -4,7 +4,7 @@
  * request/response shape — the rest of the app only sees this file.
  */
 
-export type ProviderId = "anthropic" | "openai" | "gemini" | "openrouter" | "custom";
+export type ProviderId = "anthropic" | "openai" | "gemini" | "groq" | "openrouter" | "custom";
 
 export interface ProviderCapabilities {
   supportsStructuredOutput: boolean;

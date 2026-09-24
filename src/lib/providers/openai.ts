@@ -92,9 +92,11 @@ export const openaiAdapter: ProviderAdapter = {
     supportsCustomBaseUrl: false,
   },
   defaultModels: [
-    { id: "gpt-5.1", label: "GPT-5.1" },
-    { id: "gpt-5.1-mini", label: "GPT-5.1 Mini" },
-    { id: "o4-mini", label: "o4-mini (reasoning)" },
+    { id: "gpt-6-astra", label: "GPT-6 Astra (most capable)" },
+    { id: "gpt-6-sol", label: "GPT-6 Sol (coding & agentic)" },
+    { id: "gpt-6-luna", label: "GPT-6 Luna (efficient)" },
+    { id: "gpt-5.6-sol", label: "GPT-5.6 Sol" },
+    { id: "gpt-5.6-luna", label: "GPT-5.6 Luna" },
   ],
   async generate(config, req) {
     return callOpenAI(config, req);

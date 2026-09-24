@@ -12,6 +12,7 @@ const PROVIDER_LABELS: Record<ProviderId, string> = {
   anthropic: "Anthropic",
   openai: "OpenAI",
   gemini: "Google Gemini",
+  groq: "Groq",
   openrouter: "OpenRouter",
   custom: "Other (OpenAI-compatible)",
 };
