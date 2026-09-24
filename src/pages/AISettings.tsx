@@ -67,7 +67,7 @@ export function AISettings() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6 max-w-2xl w-full mx-auto">
       <div>
         <h1 className="text-2xl font-display font-bold">AI Settings</h1>
         <p className="text-paper/60 text-sm mt-1">

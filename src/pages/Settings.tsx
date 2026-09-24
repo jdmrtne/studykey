@@ -7,7 +7,7 @@ export function Settings() {
   const removeLesson = useLessonsStore((s) => s.removeLesson);
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6 max-w-2xl w-full mx-auto">
       <h1 className="text-2xl font-display font-bold">Settings</h1>
 
       <Card className="p-6 flex flex-col gap-3">
