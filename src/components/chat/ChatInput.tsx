@@ -86,7 +86,6 @@ export function ChatInput({ onSend, disabled }: Props) {
           <Send className="w-4 h-4" />
         </button>
       </div>
-      <p className="text-xs text-paper/30 px-1">Enter to send · Shift+Enter for a new line</p>
     </div>
   );
 }
