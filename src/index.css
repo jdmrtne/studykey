@@ -48,6 +48,9 @@
      and any page that needs to reserve space for them. */
   --mobile-header-h: 3.25rem;
   --mobile-nav-h: 4rem;
+
+  /* Shared height for the sidebar's logo row and the desktop lesson bar, so the two align exactly. */
+  --topbar-h: 3.75rem;
 }
 
 [data-theme="light"] {

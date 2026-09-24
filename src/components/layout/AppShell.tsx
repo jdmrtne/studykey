@@ -128,9 +128,10 @@ export function AppShell() {
         </button>
         <div
           className={clsx(
-            "flex items-center border-b border-ink-3 h-[3.75rem] flex-shrink-0",
+            "flex items-center border-b border-ink-3 flex-shrink-0",
             collapsed ? "justify-center px-2" : "px-4"
           )}
+          style={{ height: "var(--topbar-h)" }}
         >
           <Link to="/" className={clsx("flex items-center gap-2 min-w-0", collapsed && "justify-center")}>
             <span className="w-8 h-8 rounded-xl bg-signal text-night flex items-center justify-center font-display font-bold flex-shrink-0">
@@ -173,21 +174,13 @@ export function AppShell() {
             );
           })}
         </nav>
-        <div
-          className={clsx(
-            "flex py-4 border-t border-ink-3 items-center",
-            collapsed ? "flex-col gap-3 px-2" : "justify-between px-4"
-          )}
-        >
-          {!collapsed && <span className="text-xs text-paper/40">BYOK — your key, your data</span>}
-          <ThemeToggle />
-        </div>
       </aside>
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Active-lesson bar — visible on every page so it's always obvious what's currently being studied. */}
-        <div className="border-b border-ink-3 bg-ink-2/40 px-4 md:px-8 py-2.5">
-          <div className="flex items-center gap-2 md:gap-3 max-w-5xl mx-auto">
+        {/* Active-lesson bar — visible on every page so it's always obvious what's currently being studied.
+            On desktop its height matches the sidebar's logo row (--topbar-h) so the two align. */}
+        <div className="border-b border-ink-3 bg-ink-2/40 px-4 md:px-8 py-2.5 md:py-0 flex items-center flex-shrink-0">
+          <div className="flex items-center gap-2 md:gap-3 max-w-5xl mx-auto w-full md:h-[var(--topbar-h)]">
             <BookMarked className="w-4 h-4 text-paper/40 flex-shrink-0" />
             {lessons.length === 0 ? (
               <p className="text-xs text-paper/40 truncate">
@@ -203,11 +196,14 @@ export function AppShell() {
                 <span className="text-xs font-semibold text-paper/90 truncate min-w-0">
                   {selectedLesson ? selectedLesson.title : "No lesson selected"}
                 </span>
-                <div className="ml-auto flex-shrink-0">
-                  <LessonPicker compact />
-                </div>
               </>
             )}
+            <div className="ml-auto flex items-center gap-2 md:gap-3 flex-shrink-0">
+              {lessons.length > 0 && <LessonPicker compact />}
+              <div className="hidden md:block">
+                <ThemeToggle />
+              </div>
+            </div>
           </div>
         </div>
 
