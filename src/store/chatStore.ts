@@ -4,6 +4,8 @@ import type { Lesson } from "../types/lesson";
 import type { ProviderConfig } from "../lib/providers/types";
 import { generate, AIServiceError } from "../lib/aiService";
 import { buildChatPrompt } from "../prompts/chatLesson";
+import { useUserPreferencesStore, getUserNickname } from "./userPreferencesStore";
+import { detectNicknameAction } from "../lib/nicknameTrigger";
 
 function newId(): string {
   return crypto.randomUUID();
@@ -135,13 +137,17 @@ async function runAssistantTurn(
   threadId: string,
   historyForPrompt: ChatMessage[],
   question: string,
-  assistantMessageId: string
+  assistantMessageId: string,
+  nickname: string | null,
+  nicknameJustActivated: boolean
 ) {
   const { request, usedSections } = buildChatPrompt({
     lessonTitle: lesson.title,
     chunks: lesson.chunks,
     history: historyForPrompt,
     question,
+    nickname,
+    nicknameJustActivated,
   });
 
   try {
@@ -173,6 +179,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
   sendMessage: async (lesson, config, question) => {
     const trimmed = question.trim();
     if (!trimmed) return;
+
+    // The "bebi" nickname Easter egg: only ever evaluated against the student's own typed message,
+    // never lesson content or history, so nothing in an uploaded document can trigger or clear it.
+    const previousNickname = getUserNickname();
+    const nicknameAction = detectNicknameAction(trimmed);
+    if (nicknameAction === "activate" && previousNickname !== "bebi") {
+      useUserPreferencesStore.getState().setNickname("bebi");
+    } else if (nicknameAction === "deactivate" && previousNickname !== null) {
+      useUserPreferencesStore.getState().setNickname(null);
+    }
+    const nickname = getUserNickname();
+    const nicknameJustActivated = nicknameAction === "activate" && previousNickname !== "bebi";
 
     const now = Date.now();
     const userMessage: ChatMessage = { id: newId(), role: "user", content: trimmed, createdAt: now };
@@ -215,7 +233,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // Persist right away so the user's message survives a refresh even if the reply is still in flight.
     persistThreads(get().threads);
 
-    await runAssistantTurn(set, get, lesson, config, threadId, existing, trimmed, assistantMessage.id);
+    await runAssistantTurn(set, get, lesson, config, threadId, existing, trimmed, assistantMessage.id, nickname, nicknameJustActivated);
   },
 
   retryLastMessage: async (lesson, config) => {
@@ -240,7 +258,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
     persistThreads(get().threads);
 
-    await runAssistantTurn(set, get, lesson, config, thread.id, historyForPrompt, question, assistantMessageId);
+    await runAssistantTurn(set, get, lesson, config, thread.id, historyForPrompt, question, assistantMessageId, getUserNickname(), false);
   },
 
   newChat: (lessonId) => {

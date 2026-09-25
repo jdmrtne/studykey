@@ -8,6 +8,7 @@ import { ChatMessage } from "./ChatMessage";
 import { ChatHistoryMenu } from "./ChatHistoryMenu";
 import { ChatStarterPrompts } from "./ChatStarterPrompts";
 import { ChatInput } from "./ChatInput";
+import { AI_NAME } from "../../lib/aiIdentity";
 
 interface Props {
   lesson: Lesson;
@@ -174,7 +175,7 @@ export function ChatPanel({ lesson, config }: Props) {
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-6 py-8">
             <div className="text-center">
-              <p className="font-display font-semibold text-paper/90">What would you like to know?</p>
+              <p className="font-display font-semibold text-paper/90">Hey, I'm {AI_NAME}. What are we studying today?</p>
               <p className="text-sm text-paper/50 mt-1">Answers come from your lesson. Try one of these to start:</p>
             </div>
             <ChatStarterPrompts onPick={handleSend} disabled={isBusy} />
