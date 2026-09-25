@@ -14,8 +14,8 @@ export const QUIZ_MODES: QuizModeDef[] = [
   { id: "time_attack", label: "Time Attack", tagline: "Beat the clock. Fast answers bank bonus time." },
   { id: "survival", label: "Survival", tagline: "3 lives. One miss too many and it's over." },
   { id: "streak_rush", label: "Streak Rush", tagline: "Chain correct answers to build a big multiplier." },
-  { id: "boss_round", label: "Boss Round", tagline: "A short run building to one high-stakes boss question.", comingSoon: true },
-  { id: "chaos", label: "Chaos Mode", tagline: "A different twist every question. Anything goes.", comingSoon: true },
+  { id: "boss_round", label: "Boss Round", tagline: "A short run building to one high-stakes boss question." },
+  { id: "chaos", label: "Chaos Mode", tagline: "A different twist every question. Anything goes." },
 ];
 
 export type PowerUpKind = "fifty_fifty" | "freeze" | "skip";
@@ -37,7 +37,17 @@ export interface AnswerRecord {
   picked: string | null;
 }
 
-export type AchievementId = "perfect_run" | "comeback" | "speed_demon" | "marathoner";
+/** The per-question twist Chaos Mode can roll. "normal" means no twist this question. */
+export type ChaosTwist = "normal" | "double_points" | "timed" | "no_hints";
+
+export const CHAOS_TWIST_META: Record<ChaosTwist, { banner: string }> = {
+  normal: { banner: "🎲 Normal question" },
+  double_points: { banner: "⚡ Double points!" },
+  timed: { banner: "⏱️ 10 seconds!" },
+  no_hints: { banner: "🎯 No hints this one" },
+};
+
+export type AchievementId = "perfect_run" | "comeback" | "speed_demon" | "marathoner" | "boss_slayer";
 
 export interface AchievementDef {
   id: AchievementId;
@@ -50,6 +60,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   { id: "comeback", label: "Comeback", description: "Survive down to your last life and still finish." },
   { id: "speed_demon", label: "Speed Demon", description: "Clear a Time Attack run with time to spare." },
   { id: "marathoner", label: "Marathoner", description: "Finish a run of 20 or more questions." },
+  { id: "boss_slayer", label: "Boss Slayer", description: "Beat the boss question in a Boss Round." },
 ];
 
 export interface QuizRunResult {
@@ -65,7 +76,7 @@ export interface QuizRunResult {
   livesLeft: number | null;
   timeLeftMs: number | null;
   timeBudgetMs: number | null;
-  /** False when a Survival run ended early because lives hit 0. */
+  /** False when a Survival run ended early because lives hit 0, or Time Attack/Chaos ran out the clock. */
   completedAllQuestions: boolean;
   newAchievements: AchievementId[];
 }

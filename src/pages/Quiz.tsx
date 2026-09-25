@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { SelectPills } from "../components/ui/SelectPills";
@@ -16,6 +16,7 @@ import { useQuizProfileStore } from "../store/quizProfileStore";
 import { useQuizEngine } from "../hooks/useQuizEngine";
 import { generateJSON } from "../lib/aiService";
 import { generateQuizPrompt } from "../prompts/generateQuiz";
+import { selectBossRoundQuestions } from "../lib/quizGameUtils";
 import { isQuizSet, type QuizQuestion } from "../types/study";
 import type { QuizMode, QuizRunResult } from "../types/quizGame";
 import { Loader2, ChevronLeft } from "lucide-react";
@@ -91,6 +92,16 @@ export function Quiz() {
   function handleChangeMode() {
     setStage("mode-select");
   }
+
+  // Boss Round always plays a short curated run (a handful of warmup questions plus one boss
+  // question) regardless of how many questions were generated. Memoized so the sequence — and
+  // Chaos Mode's twist rolls inside the engine, which key off this array's identity — stay
+  // stable across re-renders instead of reshuffling on every score update.
+  const playQuestions = useMemo(() => {
+    if (!questions) return null;
+    if (mode === "boss_round") return selectBossRoundQuestions(questions).sequence;
+    return questions;
+  }, [questions, mode]);
 
   function handleBackToLessons() {
     setStage("setup");
@@ -170,10 +181,10 @@ export function Quiz() {
         </div>
       )}
 
-      {stage === "playing" && questions && mode && lesson && (
+      {stage === "playing" && playQuestions && mode && lesson && (
         <QuizGameHost
           key={runId}
-          questions={questions}
+          questions={playQuestions}
           mode={mode}
           lessonId={lesson.id}
           lessonTitle={lesson.title}

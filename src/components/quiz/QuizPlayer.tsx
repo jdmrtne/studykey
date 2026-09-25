@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import clsx from "clsx";
-import { CheckCircle2, XCircle, Heart, Clock, Flame, Snowflake, SkipForward, Wand2, Eye } from "lucide-react";
+import { CheckCircle2, XCircle, Heart, Clock, Flame, Snowflake, SkipForward, Wand2, Eye, Crown, Swords } from "lucide-react";
 import { Button } from "../ui/Button";
 import type { QuizEngineState } from "../../hooks/useQuizEngine";
 import type { Lesson } from "../../types/lesson";
-import type { PowerUpKind, QuizMode } from "../../types/quizGame";
+import { CHAOS_TWIST_META, type PowerUpKind, type QuizMode } from "../../types/quizGame";
 
 const POWER_UP_META: Record<PowerUpKind, { label: string; icon: typeof Wand2 }> = {
   fifty_fifty: { label: "50/50", icon: Wand2 },
@@ -35,9 +35,23 @@ export function QuizPlayer({ engine, mode, lesson }: Props) {
 
   const options = q.type === "multiple_choice" && q.options ? q.options.filter((o) => !engine.hiddenOptions.includes(o)) : undefined;
 
+  if (engine.showBossIntro) {
+    return <BossIntro onContinue={engine.dismissBossIntro} />;
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <Hud engine={engine} mode={mode} />
+
+      {mode === "chaos" && engine.showTwistBanner && engine.currentTwist && (
+        <div className="rounded-xl bg-violet/10 border-2 border-violet/40 text-violet text-sm font-semibold px-4 py-3 text-center animate-pulse">
+          {CHAOS_TWIST_META[engine.currentTwist].banner}
+        </div>
+      )}
+
+      {mode === "chaos" && !engine.showTwistBanner && engine.currentTwist && engine.currentTwist !== "normal" && !engine.revealed && (
+        <div className="text-xs font-semibold text-violet/80 self-start px-1">{CHAOS_TWIST_META[engine.currentTwist].banner}</div>
+      )}
 
       {engine.justEarnedPowerUp && !engine.revealed && (
         <div className="rounded-xl bg-gold/10 border-2 border-gold/40 text-gold text-sm font-semibold px-4 py-2.5 flex items-center gap-2 animate-pulse">
@@ -51,10 +65,22 @@ export function QuizPlayer({ engine, mode, lesson }: Props) {
         </div>
       )}
 
-      <div className="rounded-2xl border-2 border-ink-3 bg-ink-2 p-5 flex flex-col gap-4">
-        <p className="text-xs font-semibold text-paper/40 uppercase tracking-wide">
-          Question {engine.index + 1} of {engine.total}
-        </p>
+      <div
+        className={clsx(
+          "rounded-2xl border-2 p-5 flex flex-col gap-4",
+          engine.isBossQuestion ? "border-gold/50 bg-gold/5" : "border-ink-3 bg-ink-2"
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-paper/40 uppercase tracking-wide">
+            Question {engine.index + 1} of {engine.total}
+          </p>
+          {engine.isBossQuestion && (
+            <span className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-gold bg-gold/15 rounded-full px-2.5 py-1">
+              <Crown className="w-3.5 h-3.5" /> Boss · {BOSS_MULTIPLIER_LABEL}
+            </span>
+          )}
+        </div>
         <p className="font-display font-semibold text-lg">{q.question}</p>
 
         {q.type === "multiple_choice" && options && (
@@ -146,13 +172,35 @@ export function QuizPlayer({ engine, mode, lesson }: Props) {
         )}
       </div>
 
-      <PowerUpBar engine={engine} />
+      <PowerUpBar engine={engine} mode={mode} />
 
       {engine.revealed && (
         <Button variant="primary" onClick={engine.next} className="self-start">
           {engine.index + 1 >= engine.total ? "See results" : "Next question"}
         </Button>
       )}
+    </div>
+  );
+}
+
+const BOSS_MULTIPLIER_LABEL = "1.75× points";
+
+function BossIntro({ onContinue }: { onContinue: () => void }) {
+  return (
+    <div className="rounded-2xl border-2 border-gold/50 bg-gold/5 p-8 flex flex-col items-center text-center gap-4">
+      <span className="w-16 h-16 rounded-2xl bg-gold/15 text-gold flex items-center justify-center">
+        <Swords className="w-8 h-8" />
+      </span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wide text-gold">Boss question</p>
+        <h2 className="font-display text-xl font-bold mt-1">This one's the big one.</h2>
+        <p className="text-sm text-paper/60 mt-2 max-w-xs mx-auto">
+          Pulled from the trickiest part of the lesson, worth {BOSS_MULTIPLIER_LABEL}. Take a breath, then go.
+        </p>
+      </div>
+      <Button variant="primary" onClick={onContinue}>
+        Face the boss
+      </Button>
     </div>
   );
 }
@@ -202,6 +250,7 @@ function IdentificationInput({
 }
 
 function Hud({ engine, mode }: { engine: QuizEngineState; mode: QuizMode }) {
+  const chaosTimer = mode === "chaos" && engine.currentTwist === "timed" ? engine.questionTimeLeftMs : null;
   return (
     <div className="flex flex-wrap items-center gap-3">
       <StatChip label="Score" value={String(engine.score)} />
@@ -221,6 +270,16 @@ function Hud({ engine, mode }: { engine: QuizEngineState; mode: QuizMode }) {
           )}
         >
           <Clock className="w-4 h-4" /> {formatTime(engine.timeLeftMs)}
+        </div>
+      )}
+      {chaosTimer !== null && (
+        <div
+          className={clsx(
+            "flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-sm font-semibold tabular-nums",
+            chaosTimer < 3000 ? "border-danger/60 text-danger" : "border-violet/50 text-violet"
+          )}
+        >
+          <Clock className="w-4 h-4" /> {formatTime(chaosTimer)}
         </div>
       )}
     </div>
@@ -251,10 +310,12 @@ function StatChip({ label, value }: { label: string; value: string }) {
   );
 }
 
-function PowerUpBar({ engine }: { engine: QuizEngineState }) {
+function PowerUpBar({ engine, mode }: { engine: QuizEngineState; mode: QuizMode }) {
   const kinds = engine.availablePowerUps;
   const anyHeld = kinds.some((k) => engine.powerUps[k] > 0);
   if (!anyHeld) return null;
+
+  const noHints = mode === "chaos" && engine.currentTwist === "no_hints";
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -263,8 +324,11 @@ function PowerUpBar({ engine }: { engine: QuizEngineState }) {
         if (count <= 0) return null;
         const meta = POWER_UP_META[kind];
         const Icon = meta.icon;
+        const freezeUnusable = kind === "freeze" && mode === "chaos" && engine.currentTwist !== "timed";
         const disabled =
           engine.revealed ||
+          noHints ||
+          freezeUnusable ||
           (kind === "fifty_fifty" && (engine.question.type !== "multiple_choice" || engine.hiddenOptions.length > 0)) ||
           (kind === "freeze" && engine.frozen) ||
           (kind === "skip" && engine.skipUsed);
