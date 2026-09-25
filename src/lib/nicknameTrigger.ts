@@ -12,6 +12,7 @@ const STOP_PATTERNS = [
   /\bdon'?t call me bebi\b/i,
   /\bstop calling me bebi\b/i,
   /\bdon'?t call me that\b/i,
+  /\bstop calling me that\b/i,
   /\bstop (with )?(the )?bebi\b/i,
   /\bno more bebi\b/i,
 ];

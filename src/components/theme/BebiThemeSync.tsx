@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useUserPreferencesStore } from "../../store/userPreferencesStore";
 
 /**
@@ -18,7 +18,7 @@ export function BebiThemeSync() {
   const nickname = useUserPreferencesStore((s) => s.nickname);
   const isBebiMode = nickname === "bebi";
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
     if (isBebiMode) {
       root.setAttribute("data-bebi", "true");
