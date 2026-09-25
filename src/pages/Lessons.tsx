@@ -6,7 +6,7 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { TextField } from "../components/ui/TextField";
 import { useLessonsStore } from "../store/lessonsStore";
-import { buildLessonFromFile, buildLessonFromText, estimateTokens } from "../lib/documentPipeline";
+import { buildLessonFromFile, buildLessonFromText, estimateTokens, type ExtractProgress } from "../lib/documentPipeline";
 import {
   Upload,
   FileText,
@@ -30,6 +30,12 @@ function fileKind(sourceFileName: string | undefined): { label: string; icon: ty
   return { label: "Text", icon: FileText };
 }
 
+function extractingLabel(fileName: string, ocr: ExtractProgress | null): string {
+  if (!ocr) return `Reading ${fileName}...`;
+  if (ocr.status === "loading") return "No text layer found — starting OCR...";
+  return `Running OCR on page ${ocr.page} of ${ocr.totalPages}...`;
+}
+
 function timeAgo(ts: number): string {
   const diffMs = Date.now() - ts;
   const mins = Math.floor(diffMs / 60000);
@@ -49,19 +55,22 @@ export function Lessons() {
   const [pasteText, setPasteText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [extracting, setExtracting] = useState<string | null>(null);
+  const [ocrStatus, setOcrStatus] = useState<ExtractProgress | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
     setError(null);
     setExtracting(file.name);
+    setOcrStatus(null);
     try {
-      const lesson = await buildLessonFromFile(file);
+      const lesson = await buildLessonFromFile(file, undefined, setOcrStatus);
       await saveOriginal(lesson.id, file); // keep the original so it can be read and downloaded later
       addLesson(lesson);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not read that file.");
     } finally {
       setExtracting(null);
+      setOcrStatus(null);
     }
   }
 
@@ -122,7 +131,19 @@ export function Lessons() {
               {extracting ? (
                 <>
                   <Loader2 className="w-7 h-7 text-signal animate-spin" />
-                  <p className="text-sm text-paper/60">Reading {extracting}...</p>
+                  <p className="text-sm text-paper/60">{extractingLabel(extracting, ocrStatus)}</p>
+                  {ocrStatus?.status === "recognizing" && (
+                    <div className="w-full max-w-xs h-1.5 rounded-full bg-ink-3 overflow-hidden">
+                      <div
+                        className="h-full bg-signal transition-[width] duration-150"
+                        style={{
+                          width: `${Math.round(
+                            (((ocrStatus.page - 1 + ocrStatus.pageProgress) / ocrStatus.totalPages) * 100)
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -147,8 +168,8 @@ export function Lessons() {
               />
             </div>
             <p className="text-xs text-paper/40">
-              PDF text extraction only reads the text layer — scanned/image-only PDFs won't work (no OCR yet). Old
-              .doc and .ppt files need to be re-saved as .docx / .pptx first.
+              Scanned/image-only PDFs are read with on-device OCR automatically (slower, and needs an internet
+              connection the first time). Old .doc and .ppt files need to be re-saved as .docx / .pptx first.
             </p>
           </div>
         ) : (

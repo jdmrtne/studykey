@@ -1,20 +1,25 @@
 import type { Lesson, LessonChunk } from "../types/lesson";
+import type { OcrProgress } from "./ocr";
 
 /**
  * UPLOAD -> EXTRACT TEXT -> CLEAN TEXT -> REMOVE DUPLICATES -> SPLIT INTO
  * CHUNKS, per architecture spec section 9. ANALYZE CHUNKS / CREATE LESSON
  * KNOWLEDGE happens later in aiService + prompts, once chunks exist.
  *
- * Extraction support: plain text, Markdown, PDF (pdf.js, text layer only —
- * scanned/image-only PDFs won't yield text since there's no OCR here),
- * and Word .docx (mammoth). Anything else is rejected with a clear message
- * rather than silently mis-parsed.
+ * Extraction support: plain text, Markdown, PDF (pdf.js text layer first;
+ * if a PDF has no text layer — e.g. it's a scan — each page is rasterized
+ * and run through Tesseract.js OCR instead, see ./ocr.ts), and Word .docx
+ * (mammoth). Anything else is rejected with a clear message rather than
+ * silently mis-parsed.
  */
 
 const TEXT_EXTENSIONS = [".txt", ".md", ".markdown"];
 const SUPPORTED_EXTENSIONS = [...TEXT_EXTENSIONS, ".pdf", ".docx", ".pptx"];
 
-export async function extractText(file: File): Promise<string> {
+/** Progress updates surfaced while extracting a file — currently only emitted for OCR, which is the slow path. */
+export type ExtractProgress = OcrProgress;
+
+export async function extractText(file: File, onProgress?: (p: ExtractProgress) => void): Promise<string> {
   const name = file.name.toLowerCase();
 
   if (TEXT_EXTENSIONS.some((ext) => name.endsWith(ext))) {
@@ -22,7 +27,7 @@ export async function extractText(file: File): Promise<string> {
   }
 
   if (name.endsWith(".pdf")) {
-    return await extractPdfText(file);
+    return await extractPdfText(file, onProgress);
   }
 
   if (name.endsWith(".docx")) {
@@ -53,7 +58,7 @@ export async function extractText(file: File): Promise<string> {
   );
 }
 
-async function extractPdfText(file: File): Promise<string> {
+async function extractPdfText(file: File, onProgress?: (p: ExtractProgress) => void): Promise<string> {
   // Lazy-loaded: pdf.js is a large dependency and most sessions never
   // touch a PDF, so it's kept out of the main bundle until needed.
   const [pdfjsLib, { default: pdfWorkerUrl }] = await Promise.all([
@@ -74,13 +79,19 @@ async function extractPdfText(file: File): Promise<string> {
   }
 
   const text = pages.join("\n\n").trim();
-  if (!text) {
+  if (text) return text;
+
+  // No text layer at all — likely a scanned/image-only PDF. Fall back to OCR
+  // rather than failing outright.
+  const { ocrPdf } = await import("./ocr");
+  const ocrText = await ocrPdf(file, onProgress);
+  if (!ocrText) {
     throw new Error(
-      `Couldn't find any extractable text in "${file.name}". It may be a scanned/image-only PDF, which needs ` +
-        `OCR that this app doesn't do yet — try pasting the text directly instead.`
+      `Couldn't find or recognize any text in "${file.name}", even with OCR. The scan may be too low-quality — ` +
+        `try a clearer copy, or paste the text directly instead.`
     );
   }
-  return text;
+  return ocrText;
 }
 
 async function extractDocxText(file: File): Promise<string> {
@@ -196,8 +207,12 @@ export function chunkText(text: string, opts: ChunkOptions = {}): LessonChunk[] 
   return chunks;
 }
 
-export async function buildLessonFromFile(file: File, opts?: ChunkOptions): Promise<Lesson> {
-  const raw = await extractText(file);
+export async function buildLessonFromFile(
+  file: File,
+  opts?: ChunkOptions,
+  onProgress?: (p: ExtractProgress) => void
+): Promise<Lesson> {
+  const raw = await extractText(file, onProgress);
   return buildLessonFromText(file.name.replace(/\.[^.]+$/, ""), raw, file.name, opts);
 }
 
