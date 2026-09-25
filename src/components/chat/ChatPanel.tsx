@@ -5,6 +5,7 @@ import type { ProviderConfig } from "../../lib/providers/types";
 import { useChatStore, selectMessages, selectActiveThreadId } from "../../store/chatStore";
 import { useLessonsStore } from "../../store/lessonsStore";
 import { ChatMessage } from "./ChatMessage";
+import { FloatingHearts } from "./FloatingHearts";
 import { ChatHistoryMenu } from "./ChatHistoryMenu";
 import { ChatStarterPrompts } from "./ChatStarterPrompts";
 import { ChatInput } from "./ChatInput";
@@ -166,6 +167,7 @@ export function ChatPanel({ lesson, config }: Props) {
       {/* Message list — spans the full width so its scrollbar sits at the window's right edge;
           the messages themselves stay centered in a readable column. */}
       <div className="relative flex-1 min-h-0">
+      <FloatingHearts messages={messages} />
       <div ref={scrollRef} className="absolute inset-0 overflow-y-auto overscroll-contain">
         <div
           ref={contentRef}
