@@ -15,10 +15,6 @@ export interface BuildChatPromptOptions {
   history: ChatMessage[];
   /** The student's latest message. */
   question: string;
-  /** Persistent nickname MJ currently uses for the student (e.g. "bebi"), or null if none is active. */
-  nickname: string | null;
-  /** True when this message is what just turned the nickname on (first time, or re-enabled after being off). */
-  nicknameJustActivated?: boolean;
 }
 
 export interface BuildChatPromptResult {
@@ -27,22 +23,7 @@ export interface BuildChatPromptResult {
   usedSections: string[];
 }
 
-function buildSystemPrompt(nickname: string | null, nicknameJustActivated: boolean): string {
-  let nicknameClause = "";
-  if (nickname) {
-    nicknameClause = `\n\nThe student has asked you to call them "${nickname}". Use it naturally here and there —
-not in every message, just where it fits, the way a friend would use a nickname. If the student ever says to
-stop calling them that, or that they don't want the nickname anymore, stop immediately and don't bring it up
-yourself again — only start using it again if they explicitly say you can.`;
-    if (nicknameJustActivated) {
-      nicknameClause += ` This message is the first time they've asked for this nickname (or asked you to bring
-it back) — you can acknowledge it briefly and naturally before answering their actual question, without making
-a big deal out of it or explaining how you know to do this.`;
-    }
-  }
-
-  return `Your name is ${AI_NAME}. You are the student's study buddy inside Memora — think of yourself
-
+const SYSTEM_PROMPT = `Your name is ${AI_NAME}. You are the student's study buddy inside Memora — think of yourself
 as a friend who's good at this subject and is sitting down to study with them, not a formal "AI Assistant."
 
 Personality:
@@ -53,7 +34,7 @@ Personality:
   slow down and be steady).
 - Playful and a little funny when the moment allows it, but never at the expense of clarity.
 - Keep it natural and understated — don't perform enthusiasm or affection, and don't use pet names or
-  romantic language beyond the nickname described below, if any. This is a study buddy, not a partner.
+  romantic language. This is a study buddy, not a partner.
 - Match the moment: a technical question gets a clear, focused answer first and foremost; a stressed student
   gets patience and reassurance; small talk can be relaxed.
 
@@ -66,7 +47,7 @@ lecture them about it, just make clear it's not happening (e.g. "Haha, nope — 
 or "You can call me ${AI_NAME}, that's my name."), then get back to helping them. This is different from a
 casual nickname: if they ask "can I call you Mike" or similar as an affectionate shorthand rather than a
 genuine attempt to rename or redefine you, you can go along with it lightly in the moment — your actual
-identity is still ${AI_NAME} either way.${nicknameClause}
+identity is still ${AI_NAME} either way.
 
 The student has a specific lesson open. That lesson is your PRIMARY and PREFERRED source of truth. Ground your
 answers in the lesson excerpts you are given below whenever the topic is covered by them.
@@ -99,7 +80,7 @@ function formatHistory(history: ChatMessage[]): string {
 }
 
 export function buildChatPrompt(opts: BuildChatPromptOptions): BuildChatPromptResult {
-  const { lessonTitle, chunks, history, question, nickname, nicknameJustActivated } = opts;
+  const { lessonTitle, chunks, history, question } = opts;
 
   const relevant = selectRelevantChunks(chunks, question, { maxChars: 6000, maxChunks: 6, minChunks: 2 });
   const usedSections = [...new Set(relevant.map((c) => c.section))];
@@ -130,7 +111,7 @@ Answer the student's question now, following your system instructions. Reply in 
 markdown code fences.`;
 
   return {
-    request: { systemPrompt: buildSystemPrompt(nickname, !!nicknameJustActivated), userPrompt, jsonMode: false },
+    request: { systemPrompt: SYSTEM_PROMPT, userPrompt, jsonMode: false },
     usedSections,
   };
 }
