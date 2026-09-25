@@ -23,6 +23,7 @@ import { OfflineBanner } from "../pwa/OfflineBanner";
 import { InstallMemoraButton } from "../pwa/InstallMemoraButton";
 import { useAISettingsStore, selectIsConfigured } from "../../store/aiSettingsStore";
 import { useLessonsStore, selectSelectedLesson } from "../../store/lessonsStore";
+import { AI_NAME } from "../../lib/aiIdentity";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -30,7 +31,7 @@ const NAV_ITEMS = [
   { to: "/reviewer", label: "Reviewer", icon: Sparkles },
   { to: "/quiz", label: "Quiz", icon: ListChecks },
   { to: "/flashcards", label: "Flashcards", icon: Layers },
-  { to: "/chat", label: "AI Chat", icon: MessageCircleQuestion },
+  { to: "/chat", label: `${AI_NAME} Chat`, icon: MessageCircleQuestion },
   { to: "/ai-settings", label: "AI Settings", icon: KeyRound },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ];
@@ -56,7 +57,7 @@ const LESSON_SCOPED_PATHS = new Set(["/reviewer", "/quiz", "/flashcards", "/chat
 
 /** Pages whose title lives in the top bar instead of taking up space inside the page body. */
 const HEADER_TITLES: Record<string, { title: string; subtitle: string }> = {
-  "/chat": { title: "Ask Memora", subtitle: "Ask questions about your lesson — answers stay grounded in it." },
+  "/chat": { title: `Ask ${AI_NAME}`, subtitle: "Ask questions about your lesson — answers stay grounded in it." },
 };
 
 const SIDEBAR_COLLAPSED_KEY = "studykey-sidebar-collapsed";

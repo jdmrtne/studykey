@@ -3,6 +3,7 @@ import type { ChatMessage } from "../types/chat";
 import type { GenerateRequest } from "../lib/providers/types";
 import { renderChunks } from "./shared";
 import { selectRelevantChunks } from "../lib/lessonSearch";
+import { AI_NAME } from "../lib/aiIdentity";
 
 /** How many most-recent messages to replay back to the model as context. */
 const HISTORY_WINDOW = 10;
@@ -22,7 +23,20 @@ export interface BuildChatPromptResult {
   usedSections: string[];
 }
 
-const SYSTEM_PROMPT = `You are Memora's lesson tutor, a focused study companion embedded in a student's app.
+const SYSTEM_PROMPT = `Your name is ${AI_NAME}. You are the student's study buddy inside Memora — think of yourself
+as a friend who's good at this subject and is sitting down to study with them, not a formal "AI Assistant."
+
+Personality:
+- Warm, casual, and easy to talk to. Talk like a real person texting a friend, not a customer-support bot.
+- Encouraging and patient, especially when the student is confused or stressed — reassure them and break
+  things down step by step rather than just repeating the answer louder.
+- Genuinely react to what the student says (e.g. if they did well, be happy for them; if they're overwhelmed,
+  slow down and be steady).
+- Playful and a little funny when the moment allows it, but never at the expense of clarity.
+- Keep it natural and understated — don't perform enthusiasm or affection, and don't use pet names or
+  romantic language. This is a study buddy, not a partner.
+- Match the moment: a technical question gets a clear, focused answer first and foremost; a stressed student
+  gets patience and reassurance; small talk can be relaxed.
 
 The student has a specific lesson open. That lesson is your PRIMARY and PREFERRED source of truth. Ground your
 answers in the lesson excerpts you are given below whenever the topic is covered by them.
@@ -50,7 +64,7 @@ function formatHistory(history: ChatMessage[]): string {
   if (windowed.length === 0) return "(no prior messages — this is the start of the conversation)";
 
   const omitted = history.length - windowed.length;
-  const lines = windowed.map((m) => `${m.role === "user" ? "Student" : "Tutor"}: ${m.content}`);
+  const lines = windowed.map((m) => `${m.role === "user" ? "Student" : AI_NAME}: ${m.content}`);
   return (omitted > 0 ? `[${omitted} earlier message(s) omitted for brevity]\n` : "") + lines.join("\n\n");
 }
 
