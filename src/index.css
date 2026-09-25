@@ -190,6 +190,14 @@
 .memora-prose a { color: var(--color-signal); text-decoration: underline; }
 .memora-prose img { max-width: 100%; height: auto; border-radius: 0.5rem; }
 .memora-prose blockquote { border-left: 3px solid var(--color-ink-3); padding-left: 1rem; color: color-mix(in srgb, var(--color-paper) 75%, transparent); }
-.memora-prose table { display: block; overflow-x: auto; border-collapse: collapse; max-width: 100%; }
-.memora-prose td, .memora-prose th { border: 1px solid var(--color-ink-3); padding: 0.4rem 0.7rem; vertical-align: top; }
+.memora-prose table { width: 100%; max-width: 100%; border-collapse: collapse; }
+.memora-prose td, .memora-prose th { border: 1px solid var(--color-ink-3); padding: 0.4rem 0.7rem; vertical-align: top; overflow-wrap: break-word; }
 .memora-prose th { font-weight: 700; background: color-mix(in srgb, var(--color-ink-3) 40%, transparent); }
+.memora-prose tr { break-inside: avoid; page-break-inside: avoid; }
+
+/* DOCX reader specifics: an explicit Word page break is a layout signal for
+   paginateDocx.ts, not visible content, and an oversized table scrolls
+   horizontally as a last resort rather than blowing out the page width. */
+.docx-page-break { display: none; }
+.docx-table-scroll { overflow-x: auto; max-width: 100%; }
+.docx-table-scroll table { width: max-content; min-width: 100%; }

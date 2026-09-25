@@ -1,12 +1,13 @@
 import type { Lesson } from "../../types/lesson";
 import type { SlideContent } from "../pptx";
+import { getDocxPageSetup, type DocxPageSetup } from "../docx/docxPageSetup";
 
 /**
  * Picks the best available reader for a lesson and automatically falls through
  * to the next one on failure. Technical errors are logged for developers only.
  *
  *   PDF   -> PDF reader
- *   DOCX  -> (server PDF, if configured) -> HTML (Mammoth) -> text -> failed
+ *   DOCX  -> (server PDF, if configured) -> paginated document view (Mammoth) -> plain HTML -> text -> failed
  *   PPTX  -> (server PDF, if configured) -> slide content   -> failed
  *   text  -> text reader
  */
@@ -14,7 +15,7 @@ export type FileKind = "pdf" | "docx" | "pptx" | "text";
 
 export type ReaderSource =
   | { mode: "pdf"; data: ArrayBuffer; converted: boolean }
-  | { mode: "docx-html"; html: string }
+  | { mode: "docx-html"; html: string; pageSetup: DocxPageSetup }
   | { mode: "pptx-slides"; slides: SlideContent[] }
   | { mode: "text"; text: string; reason: "plain" | "docx-fallback" | "pdf-fallback" | "pptx-fallback" | "no-original" }
   | { mode: "failed"; kind: FileKind };
@@ -47,9 +48,41 @@ async function tryServerConversion(blob: Blob, name: string): Promise<ArrayBuffe
   }
 }
 
+// Mammoth's own conversion doesn't preserve much beyond semantic structure
+// (headings, bold/italic/underline, lists, tables) by design — direct
+// formatting like custom colors/alignment/indentation isn't recoverable
+// without a full from-scratch OOXML renderer, which is out of scope here.
+// The one thing worth special-casing is explicit page breaks: `br[type='page']`
+// is a documented mammoth style-map matcher, so we turn each one into a
+// `<hr class="docx-page-break">` marker that paginateDocxHtml (see
+// lib/docx/paginateDocx.ts) uses to force a new page at that exact point,
+// instead of losing the break entirely (mammoth drops it otherwise).
+const DOCX_STYLE_MAP = ["br[type='page'] => hr.docx-page-break:fresh"];
+
+const IMAGE_PLACEHOLDER_SVG =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160">' +
+      '<rect width="100%" height="100%" fill="#e7e7ec" stroke="#c7c7d2"/>' +
+      '<text x="50%" y="50%" font-family="sans-serif" font-size="14" fill="#7a7a86" text-anchor="middle" dominant-baseline="middle">Image could not be previewed</text>' +
+      "</svg>"
+  );
+
 async function docxToHtml(buffer: ArrayBuffer): Promise<string> {
   const [mammoth, { default: DOMPurify }] = await Promise.all([import("mammoth"), import("dompurify")]);
-  const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
+  // Images embed as base64 data URIs by default (mammoth.images.dataUri);
+  // wrap that so a single unreadable image degrades to a labeled
+  // placeholder instead of silently vanishing from the document.
+  const convertImage = mammoth.images.imgElement((image) =>
+    image
+      .readAsBase64String()
+      .then((imageBuffer) => ({ src: `data:${image.contentType};base64,${imageBuffer}` }))
+      .catch((e) => {
+        console.error("Memora: DOCX image could not be converted", e);
+        return { src: IMAGE_PLACEHOLDER_SVG };
+      })
+  );
+  const result = await mammoth.convertToHtml({ arrayBuffer: buffer }, { styleMap: DOCX_STYLE_MAP, convertImage });
   if (!result.value.trim()) throw new Error("DOCX produced no HTML");
   // Uploaded documents are untrusted: strip scripts, handlers and javascript: links.
   const clean = DOMPurify.sanitize(result.value, {
@@ -98,7 +131,8 @@ export async function resolveRenderer(
 
   if (kind === "docx") {
     try {
-      return { mode: "docx-html", html: await docxToHtml(buffer) };
+      const [html, pageSetup] = await Promise.all([docxToHtml(buffer), getDocxPageSetup(buffer)]);
+      return { mode: "docx-html", html, pageSetup };
     } catch (e) {
       console.error("Memora: DOCX -> HTML failed", e);
     }
