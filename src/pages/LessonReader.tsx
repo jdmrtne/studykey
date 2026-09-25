@@ -5,6 +5,7 @@ import { useLessonsStore } from "../store/lessonsStore";
 import { getOriginal } from "../lib/fileStore";
 import { detectKind, resolveRenderer, type ReaderSource } from "../lib/reader/resolveRenderer";
 import { PdfReader } from "../components/reader/PdfReader";
+import { DocxPaginatedReader } from "../components/reader/DocxPaginatedReader";
 import { DocxHtmlReader } from "../components/reader/DocxHtmlReader";
 import { PptxSlidesReader } from "../components/reader/PptxSlidesReader";
 import { TextReader } from "../components/reader/TextReader";
@@ -18,7 +19,7 @@ function statusLabel(s: ReaderSource | null): string {
     case "pdf":
       return s.converted ? "Document preview" : "Original document";
     case "docx-html":
-      return "Content preview";
+      return "Document preview";
     case "pptx-slides":
       return "Content preview";
     case "text":
@@ -44,12 +45,14 @@ export function LessonReader() {
   const lesson = useLessonsStore((s) => s.lessons.find((l) => l.id === id));
   const [original, setOriginal] = useState<Original | null>(null);
   const [source, setSource] = useState<ReaderSource | null>(null);
+  const [docxFallback, setDocxFallback] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!lesson) return;
     let cancelled = false;
     setSource(null);
+    setDocxFallback(false);
     (async () => {
       const orig = await getOriginal(lesson.id);
       if (cancelled) return;
@@ -132,7 +135,17 @@ export function LessonReader() {
           onError={onPdfError}
         />
       )}
-      {source?.mode === "docx-html" && <DocxHtmlReader html={source.html} lessonId={lesson.id} />}
+      {source?.mode === "docx-html" &&
+        (docxFallback ? (
+          <DocxHtmlReader html={source.html} />
+        ) : (
+          <DocxPaginatedReader
+            html={source.html}
+            pageSetup={source.pageSetup}
+            lessonId={lesson.id}
+            onFallback={() => setDocxFallback(true)}
+          />
+        ))}
       {source?.mode === "pptx-slides" && <PptxSlidesReader slides={source.slides} lessonId={lesson.id} />}
       {source?.mode === "text" && (
         <>
