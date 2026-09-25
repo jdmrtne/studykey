@@ -1,5 +1,7 @@
 # Memora — AI Study Companion
 
+**Live:** https://sitememora.vercel.app/
+
 Upload or paste a lesson, then generate reviewers, quizzes, and flashcards
 using **your own** AI provider API key. No AI credits are provided by this
 app and no key is ever sent to a Memora server — it's client-side only,

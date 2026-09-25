@@ -44,7 +44,9 @@ export function ReviewerView({ reviewer, initialReviewed, onReviewedChange }: Pr
   const [reviewed, setReviewed] = useState<Set<number>>(
     () => new Set((initialReviewed ?? []).filter((n) => n >= 0 && n < reviewer.sections.length))
   );
-  const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
+  const [collapsed, setCollapsed] = useState<Set<number>>(
+    () => new Set(reviewer.sections.map((_, i) => i))
+  );
 
   const stats = useMemo(() => {
     let points = 0;
