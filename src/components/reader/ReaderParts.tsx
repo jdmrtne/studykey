@@ -1,17 +1,95 @@
-import { Info, Loader2, FileWarning, Download, RefreshCw, ArrowLeft } from "lucide-react";
+import { Info, Loader2, FileWarning, Download, RefreshCw, ArrowLeft, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import clsx from "clsx";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import type { FileKind } from "../../lib/reader/resolveRenderer";
 
+const SWIPE_DISMISS_THRESHOLD = 80;
+
 export function ReaderNotice({ title, children }: { title?: string; children: ReactNode }) {
+  const [dismissed, setDismissed] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const dragging = useRef(false);
+  const startX = useRef(0);
+  const pointerId = useRef<number | null>(null);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  if (dismissed) return null;
+
+  const dismiss = () => {
+    setLeaving(true);
+    // let the exit animation play before unmounting
+    window.setTimeout(() => setDismissed(true), 150);
+  };
+
+  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    dragging.current = true;
+    pointerId.current = e.pointerId;
+    startX.current = e.clientX;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (!dragging.current || pointerId.current !== e.pointerId) return;
+    setDragX(e.clientX - startX.current);
+  };
+
+  const endDrag = (e: PointerEvent<HTMLDivElement>) => {
+    if (pointerId.current !== e.pointerId) return;
+    dragging.current = false;
+    pointerId.current = null;
+    if (Math.abs(dragX) > SWIPE_DISMISS_THRESHOLD) {
+      setLeaving(true);
+      window.setTimeout(() => setDismissed(true), 120);
+    } else {
+      setDragX(0);
+    }
+  };
+
+  // horizontal offset from swiping, layered on top of the centering/entrance transform
+  const xOffset = leaving ? `${dragX >= 0 ? 150 : -150}%` : `${dragX}px`;
+  const yOffset = entered && !leaving ? "0px" : "12px";
+
   return (
-    <div role="note" className="flex items-start gap-2.5 px-4 py-2 text-xs bg-signal/10 border-b border-ink-3 text-paper/75">
+    <div
+      role="note"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      style={{
+        transform: `translate(calc(-50% + ${xOffset}), ${yOffset})`,
+        opacity: leaving ? 0 : entered ? Math.max(0, 1 - Math.abs(dragX) / 220) : 0,
+        transition: dragging.current ? "none" : "transform 0.2s ease, opacity 0.2s ease",
+        touchAction: "pan-y",
+        bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))",
+      }}
+      className={clsx(
+        "pointer-events-auto fixed left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-sm",
+        "flex items-start gap-2.5 rounded-xl border border-ink-3 bg-ink-2/95 px-3.5 py-2.5 pr-8 text-xs text-paper/75 shadow-lg backdrop-blur",
+        "cursor-grab active:cursor-grabbing select-none"
+      )}
+    >
       <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-signal" aria-hidden="true" />
       <p>
         {title && <span className="font-semibold text-paper/90">{title} · </span>}
         {children}
       </p>
+      <button
+        type="button"
+        aria-label="Dismiss notice"
+        onClick={dismiss}
+        onPointerDown={(e) => e.stopPropagation()}
+        className="absolute right-1.5 top-1.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-paper/50 transition-colors hover:bg-ink-3/60 hover:text-paper"
+      >
+        <X className="h-3.5 w-3.5" aria-hidden="true" />
+      </button>
     </div>
   );
 }
