@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./hooks/useTheme";
+import { BebiThemeSync } from "./components/theme/BebiThemeSync";
 import { AppShell } from "./components/layout/AppShell";
 import { Dashboard } from "./pages/Dashboard";
 import { Lessons } from "./pages/Lessons";
@@ -15,6 +16,7 @@ import { PWAUpdatePrompt } from "./components/pwa/PWAUpdatePrompt";
 export default function App() {
   return (
     <ThemeProvider>
+      <BebiThemeSync />
       <BrowserRouter>
         <Routes>
           <Route element={<AppShell />}>

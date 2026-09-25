@@ -71,6 +71,30 @@
   --glow-2: rgba(34, 85, 214, 0.1);
 }
 
+/*
+  "bebi" nickname Easter egg — baby-pink theme variant (see BebiThemeSync.tsx).
+  Applied the exact same way [data-theme="light"] applies above: an attribute on <html> that
+  overrides a handful of the same CSS custom properties. It only re-tints --color-signal /
+  --color-signal-dim (the app's single "primary accent" token — buttons, active nav, links, chat
+  accents, focus states, the user's own chat bubble, etc. all already read from it) and the signal
+  half of the ambient background glow. Every neutral (ink/paper/borders) and every other semantic
+  accent (violet, amber, mint, danger, gold) is intentionally left alone, so this reads as "the same
+  app in pink" rather than a full repaint. Written as two rules — [data-bebi="true"] for the normal
+  dark surface, and a more specific [data-bebi="true"][data-theme="light"] combo — so it composes
+  correctly with light mode regardless of which attribute the browser happens to apply first.
+*/
+[data-bebi="true"] {
+  --color-signal: #ff8fb4;
+  --color-signal-dim: #e0709a;
+  --glow-2: rgba(255, 143, 180, 0.18);
+}
+
+[data-bebi="true"][data-theme="light"] {
+  --color-signal: #d6407f;
+  --color-signal-dim: #b02f66;
+  --glow-2: rgba(214, 64, 127, 0.1);
+}
+
 /* Memora brand tokens — semantic aliases over the palette above, so themes flip in one place. */
 :root {
   --memora-primary: var(--color-signal);
@@ -90,6 +114,12 @@
   }
   html[data-theme="light"] {
     color-scheme: light;
+  }
+  /* Smooths the accent-color swap when the bebi theme variant toggles in/out (or light/dark flips).
+     Elements that already carry a Tailwind transition-* utility are unaffected: utilities load after
+     base, so their own transition wins. This just covers everything else that doesn't. */
+  *, *::before, *::after {
+    transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
   }
   body {
     @apply bg-ink text-paper font-body antialiased;
